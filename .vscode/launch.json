@@ -1,0 +1,87 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "compounds": [
+      {
+        "name": "Web: All",
+        "configurations": [
+          "Web: Server (backend)",
+          "Web: Chrome (frontend)"
+        ]
+      },
+      {
+        "name": "Electron: All",
+        "configurations": [
+          "Electron: Main (backend)",
+          "Electron: Renderer (frontend)"
+        ]
+    }
+  ],
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Web: Server (backend)",
+      "protocol": "inspector",
+      "program": "${workspaceFolder}/node_modules/@bentley/webpack-tools/bin/bentley-webpack-tools.js",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "start",
+        "--debug=9229",
+        "--noElectron"
+      ],
+      "port": 9229,
+      "timeout": 100000,
+      "showAsyncStacks": true,
+      "smartStep": true,
+      "restart": true
+    },
+    {
+      "name": "Web: Chrome (frontend)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000/",
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMapPathOverrides": {
+        "webpack:///src/*": "${webRoot}/*"
+      },
+      "smartStep": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Electron: Main (backend)",
+      "protocol": "inspector",
+      "program": "${workspaceFolder}/node_modules/@bentley/webpack-tools/bin/bentley-webpack-tools.js",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "BROWSER": "none"
+      },
+      "args": [
+        "start",
+        "--electronDebug=5858",
+        "--electronRemoteDebug=9223",
+        "--noWeb"
+      ],
+      "port": 5858,
+      "timeout": 100000,
+      "showAsyncStacks": true,
+      "smartStep": true,
+      "restart": true
+    },
+    {
+      "name": "Electron: Renderer (frontend)",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9223,
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMapPathOverrides": {
+        "webpack:///src/*": "${webRoot}/*"
+      },
+      "smartStep": true
+    }
+  ]
+}
