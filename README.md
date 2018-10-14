@@ -1,5 +1,7 @@
 # Simple Viewer App
 
+Copyright © 2018 Bentley Systems, Incorporated. All rights reserved.
+
 An iModel.js sample application that demonstrates opening an iModel and viewing its data. The data is presented using the following components:
 
 - _Viewport_: Renders geometric data onto an HTMLCanvasElement.
@@ -11,22 +13,23 @@ This app serves as a guide on how you can embed one or more of these components 
 See http://imodeljs.org for comprehensive documentation on the iModel.js API and the various constructs used in this sample.
 
 ## Development Setup
-Edit [src/common/configuration.ts](./src/common/configuration.ts) and set following variables. Read [Developer Registration](https://imodeljs.github.io/iModelJs-docs-output/getting-started/#developer-registration) to find out how can you get values for these variables.
 
+* Use the [Developer Registration](https://imodeljs.github.io/iModelJs-docs-output/getting-started/#developer-registration) page to register your application and create a sample project.
 
-* `imjs_test_oidc_client_id`: Specify OIDC client id.
-* `imjs_test_oidc_redirect_path`: Specify redirect parth for OIDC.
-* `imjs_test_project`: Specify name of the project to open.
-* `imjs_test_imodel`: Specify name of the imodel in the project to open.
+  Note: If you are just testing on localhost you can use the default registration included in this sample. However, it's recommended that you complete the registration, especially since registration is a requirement before the application can be deployed. For more information, see the section on [authorization](https://imodeljs.github.io/iModelJs-docs-output/learning/common/accesstoken/).
 
-To start the application, simply install its dependencies and run it:
+* Edit [src/common/configuration.ts](./src/common/configuration.ts) to set the values you obtain after registration.
 
-```sh
-npm install
-npm start
-```
+* Install the dependencies
+  ```sh
+  npm install
+  ```
 
-The `npm start` script automatically starts Web and Electron applications.
+* Start the application
+  ```sh
+  npm start
+  ```
+  The above script automatically starts both the Web and Electron applications.
 
 ![](./docs/header.png)
 

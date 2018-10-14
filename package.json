@@ -9,11 +9,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "bentley-webpack-tools start",
-    "start-frontend": "bentley-webpack-tools start-frontend",
-    "build-web": "bentley-webpack-tools build web",
-    "build-web-frontend": "bentley-webpack-tools build web --frontend",
-    "build-electron": "bentley-webpack-tools build electron skip_imodel_config_lookup",
+    "start": "bentley-webpack-tools start --noConfigLoader",
+    "start-frontend": "bentley-webpack-tools start-frontend --noConfigLoader",
+    "build-web": "bentley-webpack-tools build web --noConfigLoader",
+    "build-web-frontend": "bentley-webpack-tools build web --frontend --noConfigLoader",
+    "build-electron": "bentley-webpack-tools build electron --noConfigLoader",
     "build": "npm run build-web",
     "electron": "electron lib/main.js",
     "clean": "rimraf lib"
