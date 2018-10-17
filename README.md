@@ -14,22 +14,28 @@ See http://imodeljs.org for comprehensive documentation on the iModel.js API and
 
 ## Development Setup
 
-* Use the [Developer Registration](https://imodeljs.github.io/iModelJs-docs-output/getting-started/#developer-registration) page to register your application and create a sample project.
+1. (Optional) Create a sample project using the procedure at [Developer Registration](https://imodeljs.github.io/iModelJs-docs-output/getting-started/#developer-registration).  This step is not needed if you already have a project to test with.
 
-  Note: If you are just testing on localhost you can use the default registration included in this sample. However, it's recommended that you complete the registration, especially since registration is a requirement before the application can be deployed. For more information, see the section on [authorization](https://imodeljs.github.io/iModelJs-docs-output/learning/common/accesstoken/).
+2. (Recommended) Register your application at [Developer Registration](https://imodeljs.github.io/iModelJs-docs-output/getting-started/#developer-registration).
 
-* Edit [src/common/configuration.ts](./src/common/configuration.ts) to set the values you obtain after registration.
+    For the purpose of running this sample on localhost, ensure your registration includes http://localhost:3000/signin-oidc as a valid redirect URI.
 
-* Install the dependencies
+    Note: If you are just testing on localhost you can use the default registration included in this sample. However, it's recommended that you complete the registration, especially since registration is a requirement before the application can be deployed. For more information, see the section on [authorization](https://imodeljs.github.io/iModelJs-docs-output/learning/common/accesstoken/).
+
+3. Edit [src/common/configuration.ts](./src/common/configuration.ts) to set the values you obtain from the registration process.
+
+4. Install the dependencies
   ```sh
   npm install
   ```
 
-* Start the application
+5. Start the application
   ```sh
   npm start
   ```
   The above script automatically starts both the Web and Electron applications.
+
+  Note: The Electron version is meant to run on desktops, but will currently not work within a virtual machine.
 
 ![](./docs/header.png)
 

@@ -4,7 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { UserManagerSettings, UserManager, User } from "oidc-client";
 import { IDisposable, BeEvent, ActivityLoggingContext } from "@bentley/bentleyjs-core";
-import { AccessToken, UserProfile, UrlDiscoveryClient, Config } from "@bentley/imodeljs-clients";
+import { AccessToken, Config, OidcFrontendClient, OidcFrontendClientConfiguration } from "@bentley/imodeljs-clients";
 
 /**
  * A client which helps with OIDC sign in
@@ -22,31 +22,43 @@ export default class OidcClient implements IDisposable {
     });
   }
 
-  private createUserManager(): Promise<UserManager> {
-    return createOidcSettings().then((settings: UserManagerSettings) => {
-      this._userManager = new UserManager(settings);
-      this._userManager.events.addUserLoaded(this._onUserLoaded);
-      this._userManager.events.addSilentRenewError(this._onError);
-      this._userManager.events.addAccessTokenExpired(this._onUserExpired);
-      this._userManager.events.addUserUnloaded(this._onUserUnloaded);
-      this._userManager.events.addUserSignedOut(this._onUserSignedOut);
-      this._userManager.getUser().then((user: User | undefined) => {
-        if (user && !user.expired)
-          this._onUserLoaded(user);
-        else
-          this._onUserExpired();
-      }, this._onError);
+  private async getOidcSettings(): Promise<UserManagerSettings> {
+    const clientId = Config.App.getString("imjs_test_oidc_client_id"); // must be set in config
+    const oidcPath = Config.App.getString("imjs_test_oidc_redirect_path"); // must be set in config
+    const redirectUri = `${window.location.protocol}//${window.location.host}${oidcPath}`;
+    const clientConfiguration: OidcFrontendClientConfiguration = {
+      clientId,
+      redirectUri,
+    };
+    const userManagerSettings = await (new OidcFrontendClient(clientConfiguration)).getUserManagerSettings(new ActivityLoggingContext(""));
+    return userManagerSettings;
+  }
 
-      if (window.location.pathname === Config.App.getString("imjs_test_oidc_redirect_path")) {
-        this._userManager.signinRedirectCallback().then(() => {
-          window.location.replace("/");
-        }, this._onError);
-        this._userManager.signoutRedirectCallback().then(() => {
-          window.location.replace("/");
-        }, this._onError);
-      }
-      return this._userManager;
-    });
+  private async createUserManager(): Promise<UserManager> {
+    const settings: UserManagerSettings = await this.getOidcSettings();
+
+    this._userManager = new UserManager(settings);
+    this._userManager.events.addUserLoaded(this._onUserLoaded);
+    this._userManager.events.addSilentRenewError(this._onError);
+    this._userManager.events.addAccessTokenExpired(this._onUserExpired);
+    this._userManager.events.addUserUnloaded(this._onUserUnloaded);
+    this._userManager.events.addUserSignedOut(this._onUserSignedOut);
+    this._userManager.getUser().then((user: User | undefined) => {
+      if (user && !user.expired)
+        this._onUserLoaded(user);
+      else
+        this._onUserExpired();
+    }, this._onError);
+
+    if (window.location.pathname === Config.App.getString("imjs_test_oidc_redirect_path")) {
+      this._userManager.signinRedirectCallback().then(() => {
+        window.location.replace("/");
+      }, this._onError);
+      this._userManager.signoutRedirectCallback().then(() => {
+        window.location.replace("/");
+      }, this._onError);
+    }
+    return this._userManager;
   }
 
   public get ready(): Promise<void> { return this._ready; }
@@ -78,7 +90,7 @@ export default class OidcClient implements IDisposable {
    * - a valid user is found (on startup, after token refresh or token callback)
    */
   private _onUserLoaded = (user: User) => {
-    this._onUserStateChanged(createAccessToken(user), "loaded");
+    this._onUserStateChanged(OidcFrontendClient.createAccessToken(user), "loaded");
   }
 
   /**
@@ -145,28 +157,4 @@ export default class OidcClient implements IDisposable {
       throw new Error("OidcClient is not ready to be used yet");
     this._userManager.signoutRedirect();
   }
-}
-
-async function createOidcSettings(): Promise<UserManagerSettings> {
-  const loggingContext = new ActivityLoggingContext("");
-  const urlDiscoClient = new UrlDiscoveryClient();
-  // Discover url for OIDC using buddi service. This would work if 'imjs_buddi_url' is set in configuration
-  const authorityUrl = await urlDiscoClient.discoverUrl(loggingContext, "IMSOpenID" /*search key for use with url discovery service*/, undefined);
-  const oidcPath = Config.App.getString("imjs_test_oidc_redirect_path"); // must be set in config
-  const clientId = Config.App.getString("imjs_test_oidc_client_id"); // must be set in config
-  return {
-    authority: authorityUrl,
-    client_id: clientId,
-    redirect_uri: `${window.location.protocol}//${window.location.host}${oidcPath}`,
-    silent_redirect_uri: `${window.location.protocol}//${window.location.host}${oidcPath}`,
-    response_type: "id_token token",
-    scope: "openid email profile organization feature_tracking imodelhub rbac-service context-registry-service",
-  };
-}
-
-function createAccessToken(user: User): AccessToken {
-  const startsAt: Date = new Date(user.expires_at - user.expires_in!);
-  const expiresAt: Date = new Date(user.expires_at);
-  const userProfile = new UserProfile(user.profile.given_name, user.profile.family_name, user.profile.email!, user.profile.sub, user.profile.org_name!, user.profile.org!, user.profile.ultimate_site!, user.profile.usage_country_iso!);
-  return AccessToken.fromJsonWebTokenString(user.access_token, userProfile, startsAt, expiresAt);
 }
