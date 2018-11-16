@@ -81,7 +81,8 @@
       "sourceMapPathOverrides": {
         "webpack:///src/*": "${webRoot}/*"
       },
-      "smartStep": true
+      "smartStep": true,
+      "timeout": 100000
     }
   ]
 }

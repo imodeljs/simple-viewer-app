@@ -28,6 +28,7 @@ export default function initialize(rpcs: RpcInterfaceDefinition[]) {
   // routes
   app.get("/v3/swagger.json", (req, res) => rpcConfig.protocol.handleOpenApiDescriptionRequest(req, res));
   app.post("*", async (req, res) => rpcConfig.protocol.handleOperationPostRequest(req, res));
+  app.get(/\/imodel\//, async (req, res) => rpcConfig.protocol.handleOperationGetRequest(req, res));
 
   app.set("port", process.env.PORT || 5000);
   app.listen(app.get("port"), () => console.log("Web backend for simple-viewer-app listening on port " + app.get("port")));
