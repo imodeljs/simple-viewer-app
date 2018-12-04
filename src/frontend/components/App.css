@@ -63,7 +63,9 @@
   top: 0;
   height: 50%;
   width: 100%;
-  overflow: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .App .Content .right .bottom {
@@ -71,5 +73,7 @@
   bottom: 0;
   height: 50%;
   width: 100%;
-  overflow: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }

@@ -4,8 +4,9 @@
 *--------------------------------------------------------------------------------------------*/
 
 .toolbar {
+  float: right;
   background-origin: border-box;
-  top: 1%;
+  top: 3%;
   right: 1%;
   position: absolute;
   -webkit-transition: all 500ms ease;
@@ -15,7 +16,6 @@
 };
 
 .toolbar a {
-  float: right;
   padding: 12px;
   color: black;
   text-decoration: none;

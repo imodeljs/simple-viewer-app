@@ -18,7 +18,7 @@ See http://imodeljs.org for comprehensive documentation on the iModel.js API and
 
 2. (Recommended) Register your application at [Developer Registration](https://imodeljs.github.io/iModelJs-docs-output/getting-started/#developer-registration).
 
-    For the purpose of running this sample on localhost, ensure your registration includes http://localhost:3000/signin-oidc as a valid redirect URI.
+    For the purpose of running this sample on localhost, ensure your registration includes http://localhost:3000/signin-callback as a valid redirect URI.
 
     Note: If you are just testing on localhost you can use the default registration included in this sample. However, it's recommended that you complete the registration, especially since registration is a requirement before the application can be deployed. For more information, see the section on [authorization](https://imodeljs.github.io/iModelJs-docs-output/learning/common/accesstoken/).
 

@@ -8,5 +8,11 @@
     "properties": "Properties",
     "table": "Table",
     "tree": "Tree"
+  },
+  "tools": {
+    "select": "Select Element",
+    "rotate": "Rotate",
+    "pan": "Pan",
+    "zoom": "Zoom"
   }
 }

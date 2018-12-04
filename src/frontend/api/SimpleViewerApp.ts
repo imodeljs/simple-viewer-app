@@ -4,13 +4,13 @@
 *--------------------------------------------------------------------------------------------*/
 import { ActivityLoggingContext, Guid } from "@bentley/bentleyjs-core";
 import { BentleyCloudRpcParams, RpcConfiguration } from "@bentley/imodeljs-common";
-import { Config, AccessToken, UrlDiscoveryClient } from "@bentley/imodeljs-clients";
+import { Config, AccessToken, UrlDiscoveryClient, OidcFrontendClientConfiguration, IOidcFrontendClient } from "@bentley/imodeljs-clients";
 import { IModelApp } from "@bentley/imodeljs-frontend";
 import { Presentation } from "@bentley/presentation-frontend";
 import { UiCore } from "@bentley/ui-core";
 import { UiComponents } from "@bentley/ui-components";
+import { OidcBrowserClient } from "@bentley/ui-framework/lib/oidc/OidcBrowserClient";
 import { UseBackend } from "../../common/configuration";
-import OidcClient from "./OidcClient";
 import initLogging from "./logging";
 import initRpc from "./rpc";
 
@@ -20,12 +20,12 @@ initLogging();
 // subclass of IModelApp needed to use imodeljs-frontend
 export class SimpleViewerApp extends IModelApp {
   private static _rpcConfig: RpcConfiguration;
-  private static _oidcClient: OidcClient;
   private static _isReady: Promise<void>;
-
-  public static get ready(): Promise<void> { return this._isReady; }
+  private static _oidcClient: IOidcFrontendClient;
 
   public static get oidc() { return this._oidcClient; }
+
+  public static get ready(): Promise<void> { return this._isReady; }
 
   protected static onStartup() {
     // contains various initialization promises which need
@@ -34,15 +34,6 @@ export class SimpleViewerApp extends IModelApp {
 
     // initialize localization for the app
     initPromises.push(IModelApp.i18n.registerNamespace("SimpleViewer").readFinished);
-
-    // configure a CORS proxy in development mode.
-    // The Bentley services do not support CORS requests from localhost, and therefore we need to configure
-    // a proxy allow requests from the code running in the browser. In an actual deployment, this is not
-    // typically an issue if the application is in the Bentley domain, but if it is not, it's necessary to ensure
-    // that the service supports CORS requests. See https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
-    // for more details.
-    if (Config.App.getNumber("imjs_backend", UseBackend.Local) === UseBackend.Local && process.env.NODE_ENV === "development")
-      Config.App.set("imjs_dev_cors_proxy_server", `http://${window.location.hostname}:${process.env.CORS_PROXY_PORT}`);
 
     // initialize UiCore
     initPromises.push(UiCore.initialize(this.i18n));
@@ -55,20 +46,34 @@ export class SimpleViewerApp extends IModelApp {
       activeLocale: IModelApp.i18n.languageList()[0],
     });
 
-    // create an OIDC client that helps with the sign-in / sign-out process
-    this._oidcClient = new OidcClient();
-    this._oidcClient.onUserStateChanged.addListener(this._onUserStateChanged);
-    initPromises.push(this._oidcClient.ready);
-
     // initialize RPC communication
-    initPromises.push(this.getConnectionInfo().then((rpcParams) => {
-      this._rpcConfig = initRpc(rpcParams);
-      if (this._oidcClient.accessToken)
-        this._rpcConfig.applicationAuthorizationValue = this._oidcClient.accessToken.toTokenString();
-    }));
+    initPromises.push(SimpleViewerApp.initializeRpc());
+
+    // initialize OIDC
+    initPromises.push(SimpleViewerApp.initializeOidc());
 
     // the app is ready when all initialization promises are fulfilled
     this._isReady = Promise.all(initPromises).then(() => {});
+  }
+
+  private static async initializeRpc(): Promise<void> {
+    const rpcParams = await this.getConnectionInfo();
+    this._rpcConfig = initRpc(rpcParams);
+  }
+
+  private static async initializeOidc() {
+    const clientId = Config.App.get("imjs_browser_test_client_id");
+    const redirectUri = Config.App.getString("imjs_browser_test_redirect_uri"); // must be set in config
+    const oidcConfig: OidcFrontendClientConfiguration = { clientId, redirectUri };
+
+    // create an OIDC client that helps with the sign-in / sign-out process
+    this._oidcClient = new OidcBrowserClient(oidcConfig);
+    await this._oidcClient.initialize(new ActivityLoggingContext(Guid.createValue()));
+    this._oidcClient.onUserStateChanged.addListener(this._onUserStateChanged);
+
+    const accessToken: AccessToken | undefined = await this._oidcClient.getAccessToken(new ActivityLoggingContext(Guid.createValue()));
+    if (accessToken)
+      this._rpcConfig.applicationAuthorizationValue = accessToken.toTokenString();
   }
 
   public static shutdown() {
@@ -78,6 +83,7 @@ export class SimpleViewerApp extends IModelApp {
   }
 
   private static _onUserStateChanged = (accessToken: AccessToken | undefined) => {
+    // tslint:disable-next-line:no-floating-promises
     SimpleViewerApp.ready.then(() => {
       SimpleViewerApp._rpcConfig.applicationAuthorizationValue = accessToken ? accessToken.toTokenString() : "";
     });

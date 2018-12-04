@@ -2,13 +2,11 @@
 * Copyright (c) 2018 Bentley Systems, Incorporated. All rights reserved.
 * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
 *--------------------------------------------------------------------------------------------*/
+import { RpcInterfaceDefinition, MobileRpcManager } from "@bentley/imodeljs-common";
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
-}
-
-h3 {
-  margin-bottom: 0.3em;
+/**
+ * Initializes Web Server backend
+ */
+export default function initialize(rpcs: RpcInterfaceDefinition[]) {
+  MobileRpcManager.initializeImpl(rpcs);
 }

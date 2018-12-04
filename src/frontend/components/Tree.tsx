@@ -23,10 +23,12 @@ export interface Props {
 export default class SimpleTreeComponent extends React.Component<Props> {
   public render() {
     return (
-      <div>
+      <>
         <h3>{IModelApp.i18n.translate("SimpleViewer:components.tree")}</h3>
-        <SimpleTree dataProvider={new PresentationTreeDataProvider(this.props.imodel, this.props.rulesetId)} />
-      </div>
+        <div style={{flex: "1"}}>
+          <SimpleTree dataProvider={new PresentationTreeDataProvider(this.props.imodel, this.props.rulesetId)} />
+        </div>
+      </>
     );
   }
 }

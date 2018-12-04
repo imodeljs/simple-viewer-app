@@ -24,13 +24,15 @@ export interface Props {
 export default class SimplePropertiesComponent extends React.Component<Props> {
   public render() {
     return (
-      <div>
+      <>
         <h3>{IModelApp.i18n.translate("SimpleViewer:components.properties")}</h3>
-        <SimplePropertyGrid
-          orientation={Orientation.Horizontal}
-          dataProvider={new PresentationPropertyDataProvider(this.props.imodel, this.props.rulesetId)}
-        />
-      </div>
+        <div style={{flex: "1", height: "calc(100% - 50px)"}}>
+          <SimplePropertyGrid
+            orientation={Orientation.Horizontal}
+            dataProvider={new PresentationPropertyDataProvider(this.props.imodel, this.props.rulesetId)}
+          />
+        </div>
+      </>
     );
   }
 }

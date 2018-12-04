@@ -15,6 +15,7 @@ setupEnv();
 // initialize the application
 SimpleViewerApp.startup();
 
+// tslint:disable-next-line:no-floating-promises
 SimpleViewerApp.ready.then(() => {
   // when initialization is complete, render
   ReactDOM.render(

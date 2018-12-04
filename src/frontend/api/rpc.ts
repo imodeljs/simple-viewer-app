@@ -5,7 +5,7 @@
 import {
   BentleyCloudRpcManager, BentleyCloudRpcParams,
   ElectronRpcManager, ElectronRpcConfiguration,
-  RpcConfiguration, RpcOperation, IModelToken,
+  RpcConfiguration, RpcOperation, IModelToken, IModelTileRpcInterface, RpcResponseCacheControl, MobileRpcConfiguration, MobileRpcManager,
 } from "@bentley/imodeljs-common";
 import getSupportedRpcs from "../../common/rpcs";
 
@@ -18,11 +18,17 @@ export default function initRpc(rpcParams?: BentleyCloudRpcParams): RpcConfigura
   if (ElectronRpcConfiguration.isElectron) {
     // initializes RPC for Electron
     config = ElectronRpcManager.initializeClient({}, rpcInterfaces);
+  } else if (MobileRpcConfiguration.isMobileFrontend) {
+    config = MobileRpcManager.initializeClient(rpcInterfaces);
   } else {
     // initialize RPC for web apps
     if (!rpcParams)
       rpcParams = { info: { title: "simple-viewer-app", version: "v1.0" } };
     config = BentleyCloudRpcManager.initializeClient(rpcParams, rpcInterfaces);
+
+    // temporary until deployed backend is updated
+    RpcOperation.lookup(IModelTileRpcInterface, "getTileContent").policy.allowResponseCaching = () => RpcResponseCacheControl.None;
+
     if (!rpcParams.uriPrefix) {
       for (const definition of config.interfaces())
         RpcOperation.forEach(definition, (operation) => operation.policy.token = () => new IModelToken("test", "test", "test", "test"));

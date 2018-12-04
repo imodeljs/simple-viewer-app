@@ -10,7 +10,7 @@ import { Presentation } from "@bentley/presentation-backend";
 import getSupportedRpcs from "../common/rpcs";
 import { RpcInterfaceDefinition } from "@bentley/imodeljs-common/lib/common";
 import setupEnv from "../common/configuration";
-
+import { MobileRpcConfiguration } from "@bentley/imodeljs-common/lib/rpc/mobile/MobileRpcManager";
 // setup environment
 setupEnv();
 
@@ -28,11 +28,14 @@ Presentation.initialize({
 });
 
 // invoke platform-specific initialization
+// tslint:disable-next-line:no-floating-promises
 (async () => {
   // get platform-specific initialization function
   let init: (rpcs: RpcInterfaceDefinition[]) => void;
   if (electron) {
     init = (await import("./electron/main")).default;
+  } else if (MobileRpcConfiguration.isMobileBackend) {
+     init = (await import("./mobile/main")).default;
   } else {
     init = (await import("./web/main")).default;
   }

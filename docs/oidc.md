@@ -6,11 +6,11 @@ To access iModelHub services consumers need an access token. The token may be ac
 
 OIDC sign-in implementation consists of 3 parts:
 
-- [OidcClient](../src/frontend/api/OidcClient.ts) wrapper component that wraps `oidc-client` package and acts as a helper. The implementation in this sample can serve as an example or starting point.
+- OidcBrowserClient wrapper component that wraps `oidc-client` package and acts as a helper.
 
-- Application-wide `OidcClient` instance created in `IModelApp.onStartup()` callback (*see [SimpleViewerApp.ts](../src/frontend/api/SimpleViewerApp.ts)*):
+- Application-wide `OidcBrowserClient` instance created in `IModelApp.onStartup()` callback (*see [SimpleViewerApp.ts](../src/frontend/api/SimpleViewerApp.ts)*):
   ```ts
-  this._oidcClient = new OidcClient();
+  this._oidcClient = new OidcBrowserClient();
   ```
 
 - Changes in React component (*see [App.tsx](../src/frontend/components/App.tsx)*):
@@ -47,7 +47,7 @@ OIDC sign-in implementation consists of 3 parts:
   if (this.state.user.isLoading) {
     ui = `${IModelApp.i18n.translate("SimpleViewer:signing-in")}...`;
   } else if (!this.state.user.accessToken) {
-    ui = (<SignIn onSignIn={() => SimpleViewerApp.oidc.signIn()} />);
+    ui = (<SignIn onSignIn={() => SimpleViewerApp.oidc.signIn(new ActivityLoggingContext(Guid.createValue()))} />);
   } else {
     // user is logged in, render application UI
   }

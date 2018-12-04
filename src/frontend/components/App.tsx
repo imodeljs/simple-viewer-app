@@ -40,8 +40,8 @@ export default class App extends React.Component<{}, AppState> {
     super(props, context);
     this.state = {
       user: {
-        isLoading: SimpleViewerApp.oidc.isLoading,
-        accessToken: SimpleViewerApp.oidc.accessToken,
+        isLoading: false,
+        accessToken: undefined,
       },
     };
   }
@@ -51,6 +51,14 @@ export default class App extends React.Component<{}, AppState> {
     Presentation.selection.selectionChange.addListener(this._onSelectionChanged);
     // subscribe for user state changes
     SimpleViewerApp.oidc.onUserStateChanged.addListener(this._onUserStateChanged);
+    // get access token if already logged in
+    this.setState((prev) => ({ user: { ...prev.user, isLoading: true } }));
+
+    // tslint:disable-next-line:no-floating-promises
+    SimpleViewerApp.oidc.getAccessToken(new ActivityLoggingContext(Guid.createValue()))
+    .then((accessToken: AccessToken | undefined) => {
+      this.setState((prev) => ({ user: { ...prev.user, accessToken, isLoading: false } }));
+    });
   }
 
   public componentWillUnmount() {
@@ -82,8 +90,13 @@ export default class App extends React.Component<{}, AppState> {
     }
   }
 
+  private _onStartSignin = () => {
+    this.setState((prev) => ({ user: { ...prev.user, isLoading: true } }));
+    SimpleViewerApp.oidc.signIn(new ActivityLoggingContext(Guid.createValue()));
+  }
+
   private _onUserStateChanged = (accessToken: AccessToken | undefined) => {
-    this.setState((prev) => ({ user: { ...prev.user, accessToken } }));
+    this.setState((prev) => ({ user: { ...prev.user, accessToken, isLoading: false } }));
   }
 
   /** Pick the first available spatial view definition in the imodel */
@@ -112,7 +125,7 @@ export default class App extends React.Component<{}, AppState> {
       this.setState({ imodel, viewDefinitionId });
     } catch (e) {
       // if failed, close the imodel and reset the state
-      imodel.close(this.state.user.accessToken!);
+      await imodel.close(this.state.user.accessToken!);
       this.setState({ imodel: undefined, viewDefinitionId: undefined });
       alert(e.message);
     }
@@ -127,7 +140,7 @@ export default class App extends React.Component<{}, AppState> {
       ui = `${IModelApp.i18n.translate("SimpleViewer:signing-in")}...`;
     } else if (!this.state.user.accessToken) {
       // if user doesn't have and access token, show sign in page
-      ui = (<SignIn onSignIn={() => SimpleViewerApp.oidc.signIn()} />);
+      ui = (<SignIn onSignIn={this._onStartSignin.bind(this)} />);
     } else if (!this.state.imodel || !this.state.viewDefinitionId) {
       // if we don't have an imodel / view definition id - render a button that initiates imodel open
       ui = (<OpenIModelButton accessToken={this.state.user.accessToken} onIModelSelected={this._onIModelSelected} />);
@@ -177,7 +190,7 @@ class OpenIModelButton extends React.PureComponent<OpenIModelButtonProps, OpenIM
 
     const imodelQuery = new IModelQuery();
     imodelQuery.byName(imodelName);
-    const imodels = await IModelApp.iModelClient.IModels().get(new ActivityLoggingContext(Guid.createValue()),
+    const imodels = await IModelApp.iModelClient.iModels.get(new ActivityLoggingContext(Guid.createValue()),
       this.props.accessToken, project.wsgId, imodelQuery);
     if (imodels.length === 0)
       throw new Error(`iModel with name "${imodelName}" does not exist in project "${projectName}"`);
@@ -200,7 +213,7 @@ class OpenIModelButton extends React.PureComponent<OpenIModelButtonProps, OpenIM
     } catch (e) {
       alert(e.message);
     }
-    this.onIModelSelected(imodel);
+    await this.onIModelSelected(imodel);
   }
 
   public render() {
