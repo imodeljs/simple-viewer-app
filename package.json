@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "@bentley/bentleyjs-core": "~0.171.0",
+    "@bentley/bwc": "^7.1.0",
     "@bentley/config-loader": "~0.171.0",
-    "@bentley/bwc": "~7.0.1",
     "@bentley/geometry-core": "~0.171.0",
     "@bentley/icons-generic-webfont": "^0.0.5",
     "@bentley/imodeljs-backend": "~0.171.0",

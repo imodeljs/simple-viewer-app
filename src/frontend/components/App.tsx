@@ -16,7 +16,7 @@ import PropertiesWidget from "./Properties";
 import GridWidget from "./Table";
 import TreeWidget from "./Tree";
 import ViewportContentControl from "./Viewport";
-import { PrimaryLargeButton, Loader } from "@bentley/bwc/lib";
+import { PrimaryLargeButton, Loader } from "@bentley/bwc";
 import "@bentley/bwc/lib/classes.scss";
 import "./App.css";
 
