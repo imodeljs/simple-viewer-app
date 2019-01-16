@@ -1,35 +1,58 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) 2018 Bentley Systems, Incorporated. All rights reserved.
+* Copyright (c) 2019 Bentley Systems, Incorporated. All rights reserved.
 * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
 import { IModelApp, IModelConnection } from "@bentley/imodeljs-frontend";
 import { Orientation } from "@bentley/ui-core";
 import { PropertyGrid } from "@bentley/ui-components";
-import { PresentationPropertyDataProvider, withUnifiedSelection } from "@bentley/presentation-components/lib/propertygrid";
+import {
+  IPresentationPropertyDataProvider,
+  PresentationPropertyDataProvider,
+  propertyGridWithUnifiedSelection,
+} from "@bentley/presentation-components";
 
 // create a HOC property grid component that supports unified selection
 // tslint:disable-next-line:variable-name
-const SimplePropertyGrid = withUnifiedSelection(PropertyGrid);
+const SimplePropertyGrid = propertyGridWithUnifiedSelection(PropertyGrid);
 
-/** React properties for the property grid component */
-export interface Props {
-  /** iModel whose contents should be displayed in the property grid */
+/** React properties for the property pane component, that accepts an iModel connection with ruleset id */
+export interface IModelConnectionProps {
+  /** iModel whose contents should be displayed in the property pane */
   imodel: IModelConnection;
-  /** ID of the presentation rule set to use for creating the content displayed in the property grid */
+  /** ID of the presentation rule set to use for creating the hierarchy in the property pane */
   rulesetId: string;
 }
 
+/** React properties for the property pane component, that accepts a data provider */
+export interface DataProviderProps {
+  /** Custom property pane data provider. */
+  dataProvider: IPresentationPropertyDataProvider;
+}
+
+/** React properties for the property pane component */
+export type Props = IModelConnectionProps | DataProviderProps;
+
 /** Property grid component for the viewer app */
-export default class SimplePropertiesComponent extends React.Component<Props> {
+export default class SimplePropertiesComponent extends React.PureComponent<Props> {
+  private getDataProvider(props: Props) {
+    if ((props as any).dataProvider) {
+      const providerProps = props as DataProviderProps;
+      return providerProps.dataProvider;
+    } else {
+      const imodelProps = props as IModelConnectionProps;
+      return new PresentationPropertyDataProvider(imodelProps.imodel, imodelProps.rulesetId);
+    }
+  }
+
   public render() {
     return (
       <>
-        <h3>{IModelApp.i18n.translate("SimpleViewer:components.properties")}</h3>
-        <div style={{flex: "1", height: "calc(100% - 50px)"}}>
+        <h3 data-testid="property-pane-component-header">{IModelApp.i18n.translate("SimpleViewer:components.properties")}</h3>
+        <div style={{ flex: "1", height: "calc(100% - 50px)" }}>
           <SimplePropertyGrid
             orientation={Orientation.Horizontal}
-            dataProvider={new PresentationPropertyDataProvider(this.props.imodel, this.props.rulesetId)}
+            dataProvider={this.getDataProvider(this.props)}
           />
         </div>
       </>

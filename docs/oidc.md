@@ -19,20 +19,20 @@ OIDC sign-in implementation consists of 3 parts:
   ```ts
   this.state = {
     user: {
-      isLoading: SimpleViewerApp.oidc.isLoading,
-      accessToken: SimpleViewerApp.oidc.accessToken,
+      isLoading: SimpleViewerApp.oidcClient.isLoading,
+      accessToken: SimpleViewerApp.oidcClient.accessToken,
     },
   };
   ```
 
   2. Subscribe for `onUserStateChanged` callback in `componentDidMount`:
   ```ts
-  SimpleViewerApp.oidc.onUserStateChanged.addListener(this._onUserStateChanged);
+  SimpleViewerApp.oidcClient.onUserStateChanged.addListener(this._onUserStateChanged);
   ```
 
   3. Unsubscribe from `onUserStateChanged` callback in `componentWillUnmount`:
   ```ts
-  SimpleViewerApp.oidc.onUserStateChanged.removeListener(this._onUserStateChanged);
+  SimpleViewerApp.oidcClient.onUserStateChanged.removeListener(this._onUserStateChanged);
   ```
 
   4. Implement the `onUserStateChanged` event handler to update component state:
@@ -47,7 +47,7 @@ OIDC sign-in implementation consists of 3 parts:
   if (this.state.user.isLoading) {
     ui = `${IModelApp.i18n.translate("SimpleViewer:signing-in")}...`;
   } else if (!this.state.user.accessToken) {
-    ui = (<SignIn onSignIn={() => SimpleViewerApp.oidc.signIn(new ActivityLoggingContext(Guid.createValue()))} />);
+    ui = (<SignIn onSignIn={() => SimpleViewerApp.oidcClient.signIn(new ActivityLoggingContext(Guid.createValue()))} />);
   } else {
     // user is logged in, render application UI
   }

@@ -3,7 +3,8 @@
   "compilerOptions": {
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "baseUrl": "./node_modules"
+    "baseUrl": "./node_modules",
+    "outDir": "./lib"
   },
   "include": [
     "./**/*.ts",
@@ -11,6 +12,7 @@
   ],
   "exclude": [
     "lib",
-    "node_modules"
+    "node_modules",
+    "test"
   ]
 }

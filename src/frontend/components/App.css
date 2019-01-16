@@ -1,40 +1,35 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) 2018 Bentley Systems, Incorporated. All rights reserved.
+* Copyright (c) 2019 Bentley Systems, Incorporated. All rights reserved.
 * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
 *--------------------------------------------------------------------------------------------*/
 
-.App {
+.app {
   display: flex;
   flex-flow: column;
   height: 100vh;
   overflow: hidden;
 }
 
-.App .Header {
+.app-header {
   background-color: #222;
   color: white;
   padding-left: 20px;
 }
 
-.App .button-open-imodel {
+.app .button-open-imodel {
   width: 200px;
-  text-align: center;
-  position: relative;
-  top: 30%;
-  left: 50%;
-  margin-left: -100px;
-  margin-right: 100px;
+  margin: 30vh auto auto auto;
   padding-left: 0;
   padding-right: 0;
 }
 
-.App .Content {
+.app-content {
   position: relative;
   height: 100%;
   width: 100%;
 }
 
-.App .Content .top-left {
+.app-content .top-left {
   position: absolute;
   top: 0;
   left: 0;
@@ -42,7 +37,7 @@
   width: 70%;
 }
 
-.App .Content .bottom {
+.app-content .bottom {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -50,7 +45,7 @@
   width: 70%;
 }
 
-.App .Content .right {
+.app-content .right {
   position: absolute;
   top: 0;
   right: 0;
@@ -58,7 +53,7 @@
   width: 30%;
 }
 
-.App .Content .right .top {
+.app-content .right .top {
   position: absolute;
   top: 0;
   height: 50%;
@@ -68,7 +63,7 @@
   flex-direction: column;
 }
 
-.App .Content .right .bottom {
+.app-content .right .bottom {
   position: absolute;
   bottom: 0;
   height: 50%;

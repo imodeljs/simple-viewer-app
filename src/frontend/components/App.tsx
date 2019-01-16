@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) 2018 Bentley Systems, Incorporated. All rights reserved.
+* Copyright (c) 2019 Bentley Systems, Incorporated. All rights reserved.
 * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
@@ -10,14 +10,15 @@ import {
   Presentation,
   SelectionChangeEventArgs, ISelectionProvider,
 } from "@bentley/presentation-frontend";
-import { SignIn } from "@bentley/ui-framework/lib/oidc/SignIn";
+import { SignIn } from "@bentley/ui-framework";
 import { SimpleViewerApp } from "../api/SimpleViewerApp";
 import PropertiesWidget from "./Properties";
 import GridWidget from "./Table";
 import TreeWidget from "./Tree";
 import ViewportContentControl from "./Viewport";
 import { PrimaryLargeButton, Loader } from "@bentley/bwc";
-import "@bentley/bwc/lib/classes.scss";
+import "@bentley/icons-generic-webfont/dist/bentley-icons-generic-webfont.css";
+import "@bentley/bwc/lib/loaders/classes.scss";
 import "./App.css";
 
 // tslint:disable: no-console
@@ -50,22 +51,22 @@ export default class App extends React.Component<{}, AppState> {
     // subscribe for unified selection changes
     Presentation.selection.selectionChange.addListener(this._onSelectionChanged);
     // subscribe for user state changes
-    SimpleViewerApp.oidc.onUserStateChanged.addListener(this._onUserStateChanged);
+    SimpleViewerApp.oidcClient.onUserStateChanged.addListener(this._onUserStateChanged);
     // get access token if already logged in
     this.setState((prev) => ({ user: { ...prev.user, isLoading: true } }));
 
     // tslint:disable-next-line:no-floating-promises
-    SimpleViewerApp.oidc.getAccessToken(new ActivityLoggingContext(Guid.createValue()))
-    .then((accessToken: AccessToken | undefined) => {
-      this.setState((prev) => ({ user: { ...prev.user, accessToken, isLoading: false } }));
-    });
+    SimpleViewerApp.oidcClient.getAccessToken(new ActivityLoggingContext(Guid.createValue()))
+      .then((accessToken: AccessToken | undefined) => {
+        this.setState((prev) => ({ user: { ...prev.user, accessToken, isLoading: false } }));
+      });
   }
 
   public componentWillUnmount() {
     // unsubscribe from unified selection changes
     Presentation.selection.selectionChange.removeListener(this._onSelectionChanged);
     // unsubscribe from user state changes
-    SimpleViewerApp.oidc.onUserStateChanged.removeListener(this._onUserStateChanged);
+    SimpleViewerApp.oidcClient.onUserStateChanged.removeListener(this._onUserStateChanged);
   }
 
   private _onSelectionChanged = (evt: SelectionChangeEventArgs, selectionProvider: ISelectionProvider) => {
@@ -92,7 +93,7 @@ export default class App extends React.Component<{}, AppState> {
 
   private _onStartSignin = () => {
     this.setState((prev) => ({ user: { ...prev.user, isLoading: true } }));
-    SimpleViewerApp.oidc.signIn(new ActivityLoggingContext(Guid.createValue()));
+    SimpleViewerApp.oidcClient.signIn(new ActivityLoggingContext(Guid.createValue()));
   }
 
   private _onUserStateChanged = (accessToken: AccessToken | undefined) => {
@@ -131,11 +132,16 @@ export default class App extends React.Component<{}, AppState> {
     }
   }
 
+  private get _signInRedirectUri() {
+    const split = (Config.App.get("imjs_browser_test_redirect_uri") as string).split("://");
+    return split[split.length - 1];
+  }
+
   /** The component's render method */
   public render() {
     let ui: React.ReactNode;
 
-    if (this.state.user.isLoading) {
+    if (this.state.user.isLoading || window.location.href.includes(this._signInRedirectUri)) {
       // if user is currently being loaded, just tell that
       ui = `${IModelApp.i18n.translate("SimpleViewer:signing-in")}...`;
     } else if (!this.state.user.accessToken) {
@@ -151,8 +157,8 @@ export default class App extends React.Component<{}, AppState> {
 
     // render the app
     return (
-      <div className="App">
-        <div className="Header">
+      <div className="app">
+        <div className="app-header">
           <h2>{IModelApp.i18n.translate("SimpleViewer:welcome-message")}</h2>
         </div>
         {ui}
@@ -238,7 +244,7 @@ class IModelComponents extends React.PureComponent<IModelComponentsProps> {
     // can be found at `assets/presentation_rules/Default.PresentationRuleSet.xml`
     const rulesetId = "Default";
     return (
-      <div className="Content">
+      <div className="app-content">
         <div className="top-left">
           <ViewportContentControl imodel={this.props.imodel} rulesetId={rulesetId} viewDefinitionId={this.props.viewDefinitionId} />
         </div>

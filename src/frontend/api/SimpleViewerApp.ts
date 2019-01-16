@@ -1,15 +1,14 @@
 /*---------------------------------------------------------------------------------------------
-* Copyright (c) 2018 Bentley Systems, Incorporated. All rights reserved.
+* Copyright (c) 2019 Bentley Systems, Incorporated. All rights reserved.
 * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
 *--------------------------------------------------------------------------------------------*/
 import { ActivityLoggingContext, Guid } from "@bentley/bentleyjs-core";
 import { BentleyCloudRpcParams, RpcConfiguration } from "@bentley/imodeljs-common";
 import { Config, AccessToken, UrlDiscoveryClient, OidcFrontendClientConfiguration, IOidcFrontendClient } from "@bentley/imodeljs-clients";
-import { IModelApp } from "@bentley/imodeljs-frontend";
+import { IModelApp, OidcBrowserClient } from "@bentley/imodeljs-frontend";
 import { Presentation } from "@bentley/presentation-frontend";
 import { UiCore } from "@bentley/ui-core";
 import { UiComponents } from "@bentley/ui-components";
-import { OidcBrowserClient } from "@bentley/ui-framework/lib/oidc/OidcBrowserClient";
 import { UseBackend } from "../../common/configuration";
 import initLogging from "./logging";
 import initRpc from "./rpc";
@@ -23,7 +22,7 @@ export class SimpleViewerApp extends IModelApp {
   private static _isReady: Promise<void>;
   private static _oidcClient: IOidcFrontendClient;
 
-  public static get oidc() { return this._oidcClient; }
+  public static get oidcClient() { return this._oidcClient; }
 
   public static get ready(): Promise<void> { return this._isReady; }
 
@@ -53,7 +52,7 @@ export class SimpleViewerApp extends IModelApp {
     initPromises.push(SimpleViewerApp.initializeOidc());
 
     // the app is ready when all initialization promises are fulfilled
-    this._isReady = Promise.all(initPromises).then(() => {});
+    this._isReady = Promise.all(initPromises).then(() => { });
   }
 
   private static async initializeRpc(): Promise<void> {
@@ -64,7 +63,8 @@ export class SimpleViewerApp extends IModelApp {
   private static async initializeOidc() {
     const clientId = Config.App.get("imjs_browser_test_client_id");
     const redirectUri = Config.App.getString("imjs_browser_test_redirect_uri"); // must be set in config
-    const oidcConfig: OidcFrontendClientConfiguration = { clientId, redirectUri };
+    const scope = Config.App.getString("imjs_browser_test_scope");
+    const oidcConfig: OidcFrontendClientConfiguration = { clientId, redirectUri, scope };
 
     // create an OIDC client that helps with the sign-in / sign-out process
     this._oidcClient = new OidcBrowserClient(oidcConfig);
