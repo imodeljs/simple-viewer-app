@@ -40,7 +40,7 @@ export default class SimpleTableComponent extends React.PureComponent<Props> {
       return providerProps.dataProvider;
     } else {
       const imodelProps = props as IModelConnectionProps;
-      return new PresentationTableDataProvider(imodelProps.imodel, imodelProps.rulesetId);
+      return new PresentationTableDataProvider({ imodel: imodelProps.imodel, ruleset: imodelProps.rulesetId });
     }
   }
 

@@ -29,10 +29,10 @@ export default function initRpc(rpcParams?: BentleyCloudRpcParams): RpcConfigura
     // temporary until deployed backend is updated
     RpcOperation.lookup(IModelTileRpcInterface, "getTileContent").policy.allowResponseCaching = () => RpcResponseCacheControl.None;
 
-    if (!rpcParams.uriPrefix) {
-      for (const definition of config.interfaces())
-        RpcOperation.forEach(definition, (operation) => operation.policy.token = () => new IModelToken("test", "test", "test", "test"));
-    }
+    // if (!rpcParams.uriPrefix) {
+    for (const definition of config.interfaces())
+      RpcOperation.forEach(definition, (operation) => operation.policy.token = () => new IModelToken("test", "test", "test", "test"));
+    // }
   }
   return config;
 }

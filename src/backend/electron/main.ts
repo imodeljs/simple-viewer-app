@@ -28,7 +28,7 @@ export default function initialize(rpcs: RpcInterfaceDefinition[]) {
   function parseElectronUrl(requestedUrl: string): string {
     let assetPath = requestedUrl.substr("electron://".length);
     assetPath = assetPath.replace(/#.*$/, "");
-    return path.normalize(`${__dirname}/public/${assetPath}`);
+    return path.normalize(`${__dirname}/../../webresources/${assetPath}`);
   }
 
   /**
@@ -38,7 +38,7 @@ export default function initialize(rpcs: RpcInterfaceDefinition[]) {
     // in dev builds (npm start), we don't copy the public folder to lib/public,
     // so we'll need to access the original public dir for our app icon
     const isDevBuild = (process.env.NODE_ENV === "development");
-    const iconPath = (isDevBuild) ? path.join(__dirname, "../public/appicon.ico") : path.join(__dirname, "public/appicon.ico");
+    const iconPath = (isDevBuild) ? path.join(__dirname, "../../webresources/appicon.ico") : path.join(__dirname, "../../webresources/appicon.ico");
 
     // configure and create the main window
     mainWindow = new BrowserWindow({

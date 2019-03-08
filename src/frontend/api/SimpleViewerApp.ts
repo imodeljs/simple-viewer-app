@@ -3,7 +3,7 @@
 * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
 *--------------------------------------------------------------------------------------------*/
 import { ActivityLoggingContext, Guid } from "@bentley/bentleyjs-core";
-import { BentleyCloudRpcParams, RpcConfiguration } from "@bentley/imodeljs-common";
+import { BentleyCloudRpcParams, RpcConfiguration, MobileRpcConfiguration } from "@bentley/imodeljs-common";
 import { Config, AccessToken, UrlDiscoveryClient, OidcFrontendClientConfiguration, IOidcFrontendClient } from "@bentley/imodeljs-clients";
 import { IModelApp, OidcBrowserClient } from "@bentley/imodeljs-frontend";
 import { Presentation } from "@bentley/presentation-frontend";
@@ -12,6 +12,7 @@ import { UiComponents } from "@bentley/ui-components";
 import { UseBackend } from "../../common/configuration";
 import initLogging from "./logging";
 import initRpc from "./rpc";
+import { OidcIOSClient } from "./OidcIosClient";
 
 // initialize logging
 initLogging();
@@ -67,7 +68,11 @@ export class SimpleViewerApp extends IModelApp {
     const oidcConfig: OidcFrontendClientConfiguration = { clientId, redirectUri, scope };
 
     // create an OIDC client that helps with the sign-in / sign-out process
-    this._oidcClient = new OidcBrowserClient(oidcConfig);
+    if (MobileRpcConfiguration.isMobileFrontend)
+      this._oidcClient = new OidcIOSClient(); // does not require config
+    else
+      this._oidcClient = new OidcBrowserClient(oidcConfig);
+
     await this._oidcClient.initialize(new ActivityLoggingContext(Guid.createValue()));
     this._oidcClient.onUserStateChanged.addListener(this._onUserStateChanged);
 

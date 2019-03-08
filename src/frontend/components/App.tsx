@@ -10,15 +10,14 @@ import {
   Presentation,
   SelectionChangeEventArgs, ISelectionProvider,
 } from "@bentley/presentation-frontend";
+import { Button, ButtonSize, ButtonType, LoadingSpinner, SpinnerSize } from "@bentley/ui-core";
 import { SignIn } from "@bentley/ui-framework";
 import { SimpleViewerApp } from "../api/SimpleViewerApp";
 import PropertiesWidget from "./Properties";
 import GridWidget from "./Table";
 import TreeWidget from "./Tree";
 import ViewportContentControl from "./Viewport";
-import { PrimaryLargeButton, Loader } from "@bentley/bwc";
 import "@bentley/icons-generic-webfont/dist/bentley-icons-generic-webfont.css";
-import "@bentley/bwc/lib/loaders/classes.scss";
 import "./App.css";
 
 // tslint:disable: no-console
@@ -29,6 +28,7 @@ export interface AppState {
     accessToken?: AccessToken;
     isLoading?: boolean;
   };
+  offlineIModel: boolean;
   imodel?: IModelConnection;
   viewDefinitionId?: Id64String;
 }
@@ -44,6 +44,7 @@ export default class App extends React.Component<{}, AppState> {
         isLoading: false,
         accessToken: undefined,
       },
+      offlineIModel: false,
     };
   }
 
@@ -90,6 +91,9 @@ export default class App extends React.Component<{}, AppState> {
       console.log("=======================================");
     }
   }
+  private _onOffline = () => {
+    this.setState((prev) => ({ user: { ...prev.user, isLoading: false }, offlineIModel: true}));
+  }
 
   private _onStartSignin = () => {
     this.setState((prev) => ({ user: { ...prev.user, isLoading: true } }));
@@ -110,6 +114,15 @@ export default class App extends React.Component<{}, AppState> {
     const acceptedViewSpecs = viewSpecs.filter((spec) => (-1 !== acceptedViewClasses.indexOf(spec.classFullName)));
     if (0 === acceptedViewSpecs.length)
       throw new Error("No valid view definitions in imodel");
+
+    // Prefer spatial view over drawing.
+    const spatialViews = acceptedViewSpecs.filter((v) => {
+      return v.classFullName === "BisCore:SpatialViewDefinition";
+    });
+
+    if (spatialViews.length > 0)
+      return spatialViews[0].id!;
+
     return acceptedViewSpecs[0].id!;
   }
 
@@ -126,7 +139,11 @@ export default class App extends React.Component<{}, AppState> {
       this.setState({ imodel, viewDefinitionId });
     } catch (e) {
       // if failed, close the imodel and reset the state
-      await imodel.close(this.state.user.accessToken!);
+      if (this.state.offlineIModel) {
+        await imodel.closeStandalone();
+      } else {
+        await imodel.close(this.state.user.accessToken!);
+      }
       this.setState({ imodel: undefined, viewDefinitionId: undefined });
       alert(e.message);
     }
@@ -144,12 +161,12 @@ export default class App extends React.Component<{}, AppState> {
     if (this.state.user.isLoading || window.location.href.includes(this._signInRedirectUri)) {
       // if user is currently being loaded, just tell that
       ui = `${IModelApp.i18n.translate("SimpleViewer:signing-in")}...`;
-    } else if (!this.state.user.accessToken) {
+    } else if (!this.state.user.accessToken && !this.state.offlineIModel) {
       // if user doesn't have and access token, show sign in page
-      ui = (<SignIn onSignIn={this._onStartSignin.bind(this)} />);
+      ui = (<SignIn onSignIn={this._onStartSignin.bind(this)} onOffline={this._onOffline.bind(this)}/>);
     } else if (!this.state.imodel || !this.state.viewDefinitionId) {
       // if we don't have an imodel / view definition id - render a button that initiates imodel open
-      ui = (<OpenIModelButton accessToken={this.state.user.accessToken} onIModelSelected={this._onIModelSelected} />);
+      ui = (<OpenIModelButton accessToken={this.state.user.accessToken} offlineIModel={this.state.offlineIModel} onIModelSelected={this._onIModelSelected} />);
     } else {
       // if we do have an imodel and view definition id - render imodel components
       ui = (<IModelComponents imodel={this.state.imodel} viewDefinitionId={this.state.viewDefinitionId} />);
@@ -169,7 +186,8 @@ export default class App extends React.Component<{}, AppState> {
 
 /** React props for [[OpenIModelButton]] component */
 interface OpenIModelButtonProps {
-  accessToken: AccessToken;
+  accessToken: AccessToken | undefined;
+  offlineIModel: boolean;
   onIModelSelected: (imodel: IModelConnection | undefined) => void;
 }
 /** React state for [[OpenIModelButton]] component */
@@ -189,7 +207,7 @@ class OpenIModelButton extends React.PureComponent<OpenIModelButtonProps, OpenIM
     let project: Project;
     try {
       project = await connectClient.getProject(new ActivityLoggingContext(Guid.createValue()),
-        this.props.accessToken, { $filter: `Name+eq+'${projectName}'` });
+        this.props.accessToken!, { $filter: `Name+eq+'${projectName}'` });
     } catch (e) {
       throw new Error(`Project with name "${projectName}" does not exist`);
     }
@@ -197,7 +215,7 @@ class OpenIModelButton extends React.PureComponent<OpenIModelButtonProps, OpenIM
     const imodelQuery = new IModelQuery();
     imodelQuery.byName(imodelName);
     const imodels = await IModelApp.iModelClient.iModels.get(new ActivityLoggingContext(Guid.createValue()),
-      this.props.accessToken, project.wsgId, imodelQuery);
+      this.props.accessToken!, project.wsgId, imodelQuery);
     if (imodels.length === 0)
       throw new Error(`iModel with name "${imodelName}" does not exist in project "${projectName}"`);
     return { projectId: project.wsgId, imodelId: imodels[0].wsgId };
@@ -214,8 +232,13 @@ class OpenIModelButton extends React.PureComponent<OpenIModelButtonProps, OpenIM
     let imodel: IModelConnection | undefined;
     try {
       // attempt to open the imodel
-      const info = await this.getIModelInfo();
-      imodel = await IModelConnection.open(this.props.accessToken, info.projectId, info.imodelId, OpenMode.Readonly);
+     if (this.props.offlineIModel) {
+        const offlineIModel = Config.App.getString("imjs_offline_imodel");
+        imodel = await IModelConnection.openStandalone(offlineIModel, OpenMode.Readonly);
+      } else {
+        const info = await this.getIModelInfo();
+        imodel = await IModelConnection.open(this.props.accessToken!, info.projectId, info.imodelId, OpenMode.Readonly);
+      }
     } catch (e) {
       alert(e.message);
     }
@@ -224,10 +247,10 @@ class OpenIModelButton extends React.PureComponent<OpenIModelButtonProps, OpenIM
 
   public render() {
     return (
-      <PrimaryLargeButton className="button-open-imodel" onClick={this._onClick}>
+      <Button size={ButtonSize.Large} type={ButtonType.Primary} className="button-open-imodel" onClick={this._onClick}>
         <span>{IModelApp.i18n.translate("SimpleViewer:components.imodel-picker.open-imodel")}</span>
-        {this.state.isLoading ? <Loader className="bwc-loaders-small white" style={{ marginLeft: "8px" }} /> : undefined}
-      </PrimaryLargeButton>
+        {this.state.isLoading ? <div style={{ marginLeft: "8px" }}><LoadingSpinner size={SpinnerSize.Small} /></div> : undefined}
+      </Button>
     );
   }
 }

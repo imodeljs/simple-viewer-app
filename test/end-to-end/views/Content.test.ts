@@ -53,6 +53,7 @@ async function findAndExpandNode(text: string) {
 }
 
 describe("Content view", () => {
+
   it("renders after loading iModel", async () => {
     await signIn(page);
     await openIModel();
@@ -64,7 +65,7 @@ describe("Content view", () => {
     await page.waitForSelector(".components-property-grid");
 
     // Make sure that table is rendered
-    await page.waitForSelector(".react-data-grid-wrapper");
+    await page.waitForSelector(".components-table");
 
     // Make sure that toolbar is rendered
     await page.waitForSelector(".toolbar");
@@ -75,8 +76,8 @@ describe("Content view", () => {
     await openIModel();
 
     // Make sure that neither table nor property pane renders before data is loaded
-    expect(async () => page.$(".react-grid-Canvas cell")).to.throw;
-    expect(async () => page.$(".components-property-grid components-property-category-block")).to.throw;
+    expect(async () => page.$(".components-table .components-table-cell")).to.throw;
+    expect(async () => page.$(".components-property-grid .components-property-category-block")).to.throw;
 
     // Expand nodes
     await findAndExpandNode("iModel Hub Website seed file");
@@ -89,17 +90,17 @@ describe("Content view", () => {
     await nodeHandle.click();
 
     // Wait for table to load
-    await page.waitForSelector(".react-grid-Canvas .cell");
+    await page.waitForSelector(".components-table .components-table-cell");
 
     // Limit search to table
-    const tableHandle =  await page.$(".react-data-grid-wrapper");
+    const tableHandle = await page.$(".components-table");
     expect(tableHandle, "Table wrapper not found!").to.exist;
     // Find "lc1" in table
     await findByText(tableHandle!, "lc1");
 
     // Expand properties
-    await page.waitFor(".core-expandable-block .title");
-    const expanderHandle = await page.$$(".core-expandable-block .title");
+    await page.waitFor(".uicore-expandable-blocks-block .title");
+    const expanderHandle = await page.$$(".uicore-expandable-blocks-block .title");
     expect(expanderHandle[0], "Property Pane block not found!").to.exist;
     await expanderHandle[0]!.click();
 
@@ -109,4 +110,5 @@ describe("Content view", () => {
     // Find "lc1" in properties
     await findByText(propertiesHandle!, "lc1");
   });
+
 });

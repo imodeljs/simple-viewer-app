@@ -7,8 +7,10 @@ import { page } from "../setupTests";
 import { signIn } from "../helpers";
 
 describe("Open iModel view", () => {
+
   it("renders after sign in", async () => {
     await signIn(page);
     await page.waitForSelector(".button-open-imodel");
   });
+
 });

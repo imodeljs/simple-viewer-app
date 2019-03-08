@@ -6,6 +6,7 @@
 import { page } from "../setupTests";
 
 describe("Sign in view", () => {
+
   it("renders initially", async () => {
     await page.waitForSelector(".signin-button");
 
@@ -18,4 +19,5 @@ describe("Sign in view", () => {
     // Verify that "Work offline" link exists
     await page.waitForSelector(".signin-offline");
   });
+
 });

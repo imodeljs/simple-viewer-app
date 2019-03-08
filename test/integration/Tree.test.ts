@@ -31,8 +31,6 @@ describe("Tree", () => {
 
   it("generates correct hierarchy for 'Default' ruleset", async () => {
     const hierarchy = await builder.createHierarchy("Default");
-
-    expect(hierarchy).to.not.be.undefined;
     expect(hierarchy).to.matchSnapshot();
   });
 

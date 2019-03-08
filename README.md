@@ -84,7 +84,7 @@ The purpose of this application is to demonstrate the following:
 * [Dependencies](./package.json) required for iModel.js-based frontend applications.
 * [Scripts](./package.json) recommended to build and run iModel.js-based applications.
 * How to set up a simple backend for
-  [web](./src/backend/web/main.ts) and
+  [web](./src/backend/web/BackendServer.ts) and
   [electron](./src/backend/electron/main.ts).
 * How to set up a simple [frontend for web and electron](./src/frontend/api/SimpleViewerApp.ts).
 * How to [implement OIDC sign-in](./docs/oidc.md) to get access to iModels on iModelHub.
