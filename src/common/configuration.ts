@@ -40,7 +40,7 @@ export default function setupEnv() {
     // Set this to be the registered redirect URI
     // Note: "http://localhost:3000/signin-callback" is setup to work with the (default) clientId above
 
-    imjs_browser_test_scope: "openid email profile organization feature_tracking imodelhub context-registry-service imodeljs-router",
+    imjs_browser_test_scope: "openid email profile organization imodelhub context-registry-service",
     // Set this to be the scopes of services the application needs to access
     // Note: The default value set above ensures the minimal working of the application
   });

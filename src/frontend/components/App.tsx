@@ -3,15 +3,12 @@
 * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
 *--------------------------------------------------------------------------------------------*/
 import * as React from "react";
-import { Id64String, OpenMode, ActivityLoggingContext, Guid } from "@bentley/bentleyjs-core";
+import { Id64String, OpenMode } from "@bentley/bentleyjs-core";
 import { AccessToken, ConnectClient, IModelQuery, Project, Config } from "@bentley/imodeljs-clients";
-import { IModelApp, IModelConnection } from "@bentley/imodeljs-frontend";
-import {
-  Presentation,
-  SelectionChangeEventArgs, ISelectionProvider,
-} from "@bentley/presentation-frontend";
-import { Button, ButtonSize, ButtonType, LoadingSpinner, SpinnerSize } from "@bentley/ui-core";
-import { SignIn } from "@bentley/ui-framework";
+import { IModelApp, IModelConnection, FrontendRequestContext, AuthorizedFrontendRequestContext } from "@bentley/imodeljs-frontend";
+import { Presentation, SelectionChangeEventArgs, ISelectionProvider } from "@bentley/presentation-frontend";
+import { Button, ButtonSize, ButtonType, Spinner, SpinnerSize } from "@bentley/ui-core";
+import { SignIn } from "@bentley/ui-components";
 import { SimpleViewerApp } from "../api/SimpleViewerApp";
 import PropertiesWidget from "./Properties";
 import GridWidget from "./Table";
@@ -21,6 +18,7 @@ import "@bentley/icons-generic-webfont/dist/bentley-icons-generic-webfont.css";
 import "./App.css";
 
 // tslint:disable: no-console
+// cSpell:ignore imodels
 
 /** React state of the App component */
 export interface AppState {
@@ -51,16 +49,15 @@ export default class App extends React.Component<{}, AppState> {
   public componentDidMount() {
     // subscribe for unified selection changes
     Presentation.selection.selectionChange.addListener(this._onSelectionChanged);
-    // subscribe for user state changes
-    SimpleViewerApp.oidcClient.onUserStateChanged.addListener(this._onUserStateChanged);
-    // get access token if already logged in
-    this.setState((prev) => ({ user: { ...prev.user, isLoading: true } }));
 
-    // tslint:disable-next-line:no-floating-promises
-    SimpleViewerApp.oidcClient.getAccessToken(new ActivityLoggingContext(Guid.createValue()))
-      .then((accessToken: AccessToken | undefined) => {
-        this.setState((prev) => ({ user: { ...prev.user, accessToken, isLoading: false } }));
-      });
+    // Initialize authorization state, and add listener to changes
+    SimpleViewerApp.oidcClient.onUserStateChanged.addListener(this._onUserStateChanged);
+    if (SimpleViewerApp.oidcClient.isAuthorized) {
+      SimpleViewerApp.oidcClient.getAccessToken(new FrontendRequestContext()) // tslint:disable-line: no-floating-promises
+        .then((accessToken: AccessToken | undefined) => {
+          this.setState((prev) => ({ user: { ...prev.user, accessToken, isLoading: false } }));
+        });
+    }
   }
 
   public componentWillUnmount() {
@@ -91,13 +88,18 @@ export default class App extends React.Component<{}, AppState> {
       console.log("=======================================");
     }
   }
-  private _onOffline = () => {
-    this.setState((prev) => ({ user: { ...prev.user, isLoading: false }, offlineIModel: true}));
+
+  private _onRegister = () => {
+    window.open("https://imodeljs.github.io/iModelJs-docs-output/getting-started/#developer-registration", "_blank");
   }
 
-  private _onStartSignin = () => {
+  private _onOffline = () => {
+    this.setState((prev) => ({ user: { ...prev.user, isLoading: false }, offlineIModel: true }));
+  }
+
+  private _onStartSignin = async () => {
     this.setState((prev) => ({ user: { ...prev.user, isLoading: true } }));
-    SimpleViewerApp.oidcClient.signIn(new ActivityLoggingContext(Guid.createValue()));
+    await SimpleViewerApp.oidcClient.signIn(new FrontendRequestContext());
   }
 
   private _onUserStateChanged = (accessToken: AccessToken | undefined) => {
@@ -140,9 +142,9 @@ export default class App extends React.Component<{}, AppState> {
     } catch (e) {
       // if failed, close the imodel and reset the state
       if (this.state.offlineIModel) {
-        await imodel.closeStandalone();
+        await imodel.closeSnapshot();
       } else {
-        await imodel.close(this.state.user.accessToken!);
+        await imodel.close();
       }
       this.setState({ imodel: undefined, viewDefinitionId: undefined });
       alert(e.message);
@@ -163,7 +165,7 @@ export default class App extends React.Component<{}, AppState> {
       ui = `${IModelApp.i18n.translate("SimpleViewer:signing-in")}...`;
     } else if (!this.state.user.accessToken && !this.state.offlineIModel) {
       // if user doesn't have and access token, show sign in page
-      ui = (<SignIn onSignIn={this._onStartSignin.bind(this)} onOffline={this._onOffline.bind(this)}/>);
+      ui = (<SignIn onSignIn={this._onStartSignin} onRegister={this._onRegister} onOffline={this._onOffline} />);
     } else if (!this.state.imodel || !this.state.viewDefinitionId) {
       // if we don't have an imodel / view definition id - render a button that initiates imodel open
       ui = (<OpenIModelButton accessToken={this.state.user.accessToken} offlineIModel={this.state.offlineIModel} onIModelSelected={this._onIModelSelected} />);
@@ -203,19 +205,19 @@ class OpenIModelButton extends React.PureComponent<OpenIModelButtonProps, OpenIM
     const projectName = Config.App.get("imjs_test_project");
     const imodelName = Config.App.get("imjs_test_imodel");
 
+    const requestContext: AuthorizedFrontendRequestContext = await AuthorizedFrontendRequestContext.create();
+
     const connectClient = new ConnectClient();
     let project: Project;
     try {
-      project = await connectClient.getProject(new ActivityLoggingContext(Guid.createValue()),
-        this.props.accessToken!, { $filter: `Name+eq+'${projectName}'` });
+      project = await connectClient.getProject(requestContext, { $filter: `Name+eq+'${projectName}'` });
     } catch (e) {
       throw new Error(`Project with name "${projectName}" does not exist`);
     }
 
     const imodelQuery = new IModelQuery();
     imodelQuery.byName(imodelName);
-    const imodels = await IModelApp.iModelClient.iModels.get(new ActivityLoggingContext(Guid.createValue()),
-      this.props.accessToken!, project.wsgId, imodelQuery);
+    const imodels = await IModelApp.iModelClient.iModels.get(requestContext, project.wsgId, imodelQuery);
     if (imodels.length === 0)
       throw new Error(`iModel with name "${imodelName}" does not exist in project "${projectName}"`);
     return { projectId: project.wsgId, imodelId: imodels[0].wsgId };
@@ -232,12 +234,12 @@ class OpenIModelButton extends React.PureComponent<OpenIModelButtonProps, OpenIM
     let imodel: IModelConnection | undefined;
     try {
       // attempt to open the imodel
-     if (this.props.offlineIModel) {
+      if (this.props.offlineIModel) {
         const offlineIModel = Config.App.getString("imjs_offline_imodel");
-        imodel = await IModelConnection.openStandalone(offlineIModel, OpenMode.Readonly);
+        imodel = await IModelConnection.openSnapshot(offlineIModel);
       } else {
         const info = await this.getIModelInfo();
-        imodel = await IModelConnection.open(this.props.accessToken!, info.projectId, info.imodelId, OpenMode.Readonly);
+        imodel = await IModelConnection.open(info.projectId, info.imodelId, OpenMode.Readonly);
       }
     } catch (e) {
       alert(e.message);
@@ -247,9 +249,9 @@ class OpenIModelButton extends React.PureComponent<OpenIModelButtonProps, OpenIM
 
   public render() {
     return (
-      <Button size={ButtonSize.Large} type={ButtonType.Primary} className="button-open-imodel" onClick={this._onClick}>
+      <Button size={ButtonSize.Large} buttonType={ButtonType.Primary} className="button-open-imodel" onClick={this._onClick}>
         <span>{IModelApp.i18n.translate("SimpleViewer:components.imodel-picker.open-imodel")}</span>
-        {this.state.isLoading ? <div style={{ marginLeft: "8px" }}><LoadingSpinner size={SpinnerSize.Small} /></div> : undefined}
+        {this.state.isLoading ? <span style={{ marginLeft: "8px" }}><Spinner size={SpinnerSize.Small} /></span> : undefined}
       </Button>
     );
   }

@@ -6,7 +6,7 @@
 import * as React from "react";
 import {
   IModelApp,
-  ZoomViewTool, PanViewTool, RotateViewTool, SelectionTool,
+  ZoomViewTool, PanViewTool, RotateViewTool, SelectionTool, FitViewTool,
 } from "@bentley/imodeljs-frontend";
 
 import "./Components.scss";
@@ -15,10 +15,11 @@ import "./Components.scss";
 const toolbar = () => {
   return (
     <div className="toolbar">
-      <a href="#" title={IModelApp.i18n.translate("SimpleViewer:tools.select")} onClick={select}><span className="icon icon-cursor"></span></a>
-      <a href="#" title={IModelApp.i18n.translate("SimpleViewer:tools.rotate")} onClick={rotate}><span className="icon icon-gyroscope"></span></a>
-      <a href="#" title={IModelApp.i18n.translate("SimpleViewer:tools.pan")} onClick={pan}><span className="icon icon-hand-2"></span></a>
-      <a href="#" title={IModelApp.i18n.translate("SimpleViewer:tools.zoom")} onClick={zoom}><span className="icon icon-zoom"></span></a>
+      <a href="#" title={SelectionTool.flyover} onClick={select}><span className="icon icon-cursor"></span></a>
+      <a href="#" title={FitViewTool.flyover} onClick={fitView}><span className="icon icon-fit-to-view"></span></a>
+      <a href="#" title={RotateViewTool.flyover} onClick={rotate}><span className="icon icon-gyroscope"></span></a>
+      <a href="#" title={PanViewTool.flyover} onClick={pan}><span className="icon icon-hand-2"></span></a>
+      <a href="#" title={ZoomViewTool.flyover} onClick={zoom}><span className="icon icon-zoom"></span></a>
     </div>
   );
 };
@@ -30,6 +31,10 @@ const toolbar = () => {
 
 const select = () => {
   IModelApp.tools.run(SelectionTool.toolId);
+};
+
+const fitView = () => {
+  IModelApp.tools.run(FitViewTool.toolId, IModelApp.viewManager.selectedView);
 };
 
 const rotate = () => {

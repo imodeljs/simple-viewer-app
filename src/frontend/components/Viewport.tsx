@@ -27,14 +27,14 @@ export interface Props {
 export default class SimpleViewportComponent extends React.Component<Props> {
   public render() {
     return (
-      <div>
+      <>
         <SimpleViewport
           imodel={this.props.imodel}
-          rulesetId={this.props.rulesetId}
+          ruleset={this.props.rulesetId}
           viewDefinitionId={this.props.viewDefinitionId}
         />
         <Toolbar />
-      </div>
+      </>
     );
   }
 }

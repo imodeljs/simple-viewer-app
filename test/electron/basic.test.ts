@@ -12,12 +12,12 @@ describe("Application launch", () => {
   beforeEach(async () => {
     testApp = new Application({
       path: app as any,
-      args: [path.join(__dirname, "..", "..", "lib/backend/main.js")]
+      args: [path.join(__dirname, "..", "..", "lib/backend/main.js")],
     });
     return testApp.start();
   });
 
-  afterEach( async () => {
+  afterEach(async () => {
     if (testApp && testApp.isRunning()) {
       return testApp.stop();
     } else {
@@ -34,9 +34,9 @@ describe("Application launch", () => {
   });
 
   it("sign page", async () => {
-    testApp.client.waitForExist(".signin-offline").then((t) => {
+    testApp.client.waitForExist(".components-signin-offline").then((t) => {
       assert.isTrue(t);
-    }).waitForExist(".signin-button").then((t) => {
+    }).waitForExist(".components-signin-button").then((t) => {
       assert.isTrue(t);
     });
   });

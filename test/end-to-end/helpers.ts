@@ -2,12 +2,12 @@
 * Copyright (c) 2019 Bentley Systems, Incorporated. All rights reserved.
 * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
 *--------------------------------------------------------------------------------------------*/
-
+import { Config } from "@bentley/imodeljs-clients";
 import * as Puppeteer from "puppeteer";
 
 /** Wait for the specified text to appear on the page */
 export async function waitForText(page: Puppeteer.Page, text: string, options?: Puppeteer.WaitForSelectorOptions) {
-  await page.waitForXPath(`//text()[contains(., '${text}')]`, { visible: true, ...options});
+  await page.waitForXPath(`//text()[contains(., '${text}')]`, { visible: true, ...options });
 }
 
 /** Find an element in the DOM by specified text */
@@ -22,8 +22,8 @@ export async function findByText(element: Puppeteer.Page | Puppeteer.ElementHand
 
 /** Sign in to the main page using test credentials */
 export async function signIn(page: Puppeteer.Page) {
-  await page.waitForSelector(".signin-button");
-  await page.click(".signin-button");
+  await page.waitForSelector(".components-signin-button");
+  await page.click(".components-signin-button");
 
   await fillInSignin(page);
 }
@@ -32,8 +32,8 @@ export async function signIn(page: Puppeteer.Page) {
 export async function fillInSignin(page: Puppeteer.Page) {
   await page.waitForSelector("#submitLogon");
 
-  await page.type("#EmailAddress", "Regular.IModelJsTestUser@mailinator.com");
-  await page.type("#Password", "Regular@iMJs");
+  await page.type("#EmailAddress", Config.App.getString("imjs_test_regular_user_name"));
+  await page.type("#Password", Config.App.getString("imjs_test_regular_user_password"));
 
   await page.click("#submitLogon");
 }

@@ -21,12 +21,12 @@ describe("Tree", () => {
   const imodelPath = "test/integration/test-data/Properties_60InstancesWithUrl2.ibim";
 
   beforeEach(async () => {
-    imodel = await IModelConnection.openStandalone(imodelPath);
+    imodel = await IModelConnection.openSnapshot(imodelPath);
     builder = new HierarchyBuilder(imodel);
   });
 
   afterEach(async () => {
-    await imodel.closeStandalone();
+    await imodel.closeSnapshot();
   });
 
   it("generates correct hierarchy for 'Default' ruleset", async () => {
