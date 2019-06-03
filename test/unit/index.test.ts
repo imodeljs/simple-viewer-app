@@ -2,8 +2,6 @@
 * Copyright (c) 2019 Bentley Systems, Incorporated. All rights reserved.
 * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
 *--------------------------------------------------------------------------------------------*/
-/* tslint:disable noUnusedLocals*/
-
 import * as path from "path";
 import * as typemoq from "typemoq";
 import { IModelApp, NoRenderApp } from "@bentley/imodeljs-frontend";
@@ -14,17 +12,6 @@ import { Presentation, SelectionManager } from "@bentley/presentation-frontend";
 import { SelectionScopesManager } from "@bentley/presentation-frontend/lib/selection/SelectionScopesManager";
 import { I18NOptions } from "@bentley/imodeljs-i18n";
 
-function mockI18n() {
-  (IModelApp as any)._i18n = {
-    translateKeys: () => "",
-    translate: (text: string) => text,
-    loadNamespace: () => {},
-    languageList: () => ["en"],
-    registerNamespace: () => ({ readFinished: Promise.resolve(), name: "" }),
-    waitForAllRead: async () => [],
-    unregisterNamespace: () => {},
-  };
-}
 
 function supplyI18NOptions(): I18NOptions {
   const urlTemplate = "file://" + path.join(path.resolve("lib/webresources/locales"), "{{lng}}/{{ns}}.json").replace(/\\/g, "/");
@@ -33,7 +20,6 @@ function supplyI18NOptions(): I18NOptions {
 
 before(async () => {
   NoRenderApp.startup({ i18n: supplyI18NOptions() });
-  mockI18n();
 
   await UiCore.initialize(IModelApp.i18n);
   await UiComponents.initialize(IModelApp.i18n);

@@ -5,7 +5,7 @@
 import {
   BentleyCloudRpcManager, BentleyCloudRpcParams,
   ElectronRpcManager, ElectronRpcConfiguration,
-  RpcConfiguration, RpcOperation, IModelTileRpcInterface, RpcResponseCacheControl, MobileRpcConfiguration, MobileRpcManager,
+  RpcConfiguration, MobileRpcConfiguration, MobileRpcManager,
 } from "@bentley/imodeljs-common";
 import getSupportedRpcs from "../../common/rpcs";
 
@@ -25,9 +25,6 @@ export default function initRpc(rpcParams?: BentleyCloudRpcParams): RpcConfigura
     if (!rpcParams)
       rpcParams = { info: { title: "simple-viewer-app", version: "v1.0" }, uriPrefix: "http://localhost:3001" };
     config = BentleyCloudRpcManager.initializeClient(rpcParams, rpcInterfaces);
-
-    // temporary until deployed backend is updated
-    RpcOperation.lookup(IModelTileRpcInterface, "getTileContent").policy.allowResponseCaching = () => RpcResponseCacheControl.None;
   }
   return config;
 }

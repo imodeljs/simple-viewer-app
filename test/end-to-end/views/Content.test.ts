@@ -80,7 +80,7 @@ describe("Content view", () => {
     expect(async () => page.$(".components-property-grid .components-property-category-block")).to.throw;
 
     // Expand nodes
-    await findAndExpandNode("iModel Hub Website seed file");
+    await findAndExpandNode("SVA TEST PROJECT");
     await findAndExpandNode("BisCore.DictionaryModel");
     await findAndExpandNode("Line Style");
 

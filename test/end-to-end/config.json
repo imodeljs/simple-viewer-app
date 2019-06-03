@@ -4,8 +4,8 @@
   // Must make sure the lines below point to a valid imodel that is used for e2e testing - create a new project
   // and iModel with the developer registration procedure here - https://git.io/fx8YP
   // -----------------------------------------------------------------------------------------------------------
-  "imjs_test_project": "Retail Building Sample QA",
-  "imjs_test_imodel": "Retail Building Sample QA",
+  "imjs_test_project": "SVA TEST PROJECT",
+  "imjs_test_imodel": "SVA TEST IMODEL",
 
   // -----------------------------------------------------------------------------------------------------------
   // Use QA services for e2e testing

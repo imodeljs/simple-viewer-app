@@ -20,7 +20,7 @@ class EmptyTreeDataProvider implements IPresentationTreeDataProvider {
   public getFilteredNodePaths = async () => [];
   public get onTreeNodeChanged() { return undefined; }
   public get rulesetId() { return ""; }
-  public getNodeKey = () => ({type: "testType", pathFromRoot: ["root"]});
+  public getNodeKey = () => ({ type: "testType", pathFromRoot: ["root"] });
   public getNodes = async () => this._nodes;
   public getNodesCount = async () => this._nodes.length;
 }
@@ -28,7 +28,7 @@ class EmptyTreeDataProvider implements IPresentationTreeDataProvider {
 describe("Tree", () => {
 
   it("renders header and tree component", () => {
-    const renderWrapper = render(<TreeComponent dataProvider={new EmptyTreeDataProvider()}/>);
+    const renderWrapper = render(<TreeComponent dataProvider={new EmptyTreeDataProvider()} />);
     const header = renderWrapper.getByTestId("tree-component-header");
     expect(header.innerHTML).to.be.equal(IModelApp.i18n.translate("SimpleViewer:components.tree"));
     expect(renderWrapper.container.querySelector(".components-tree-loader")).to.not.be.empty;
@@ -37,7 +37,7 @@ describe("Tree", () => {
   describe("Tree content", () => {
 
     class DataProvider extends EmptyTreeDataProvider {
-      protected _nodes: TreeNodeItem[] = [{id: "1", label: "Node 1"}, {id: "2", label: "Node 2"}];
+      protected _nodes: TreeNodeItem[] = [{ id: "1", label: "Node 1" }, { id: "2", label: "Node 2" }];
     }
 
     before(() => {
@@ -57,14 +57,14 @@ describe("Tree", () => {
     });
 
     it("renders 'no data' when data provider is empty", async () => {
-      const renderWrapper = render(<TreeComponent dataProvider={new EmptyTreeDataProvider()}/>);
+      const renderWrapper = render(<TreeComponent dataProvider={new EmptyTreeDataProvider()} />);
       expect(renderWrapper.container.querySelector(".components-tree-loader")).to.not.be.empty;
       const noDataLabel = await waitForElement(() => renderWrapper.getByText(IModelApp.i18n.translate("UiComponents:general.noData")));
       expect(noDataLabel).to.not.be.undefined;
     });
 
     it("renders all nodes from data provider when it's not empty", async () => {
-      const renderWrapper = render(<TreeComponent dataProvider={new DataProvider()}/>);
+      const renderWrapper = render(<TreeComponent dataProvider={new DataProvider()} />);
       expect(renderWrapper.container.querySelector(".components-tree-loader")).to.not.be.empty;
 
       const nodes = await waitForElement(() => renderWrapper.getAllByTestId("tree-node"));
