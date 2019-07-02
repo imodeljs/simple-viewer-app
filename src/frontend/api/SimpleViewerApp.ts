@@ -2,7 +2,7 @@
 * Copyright (c) 2019 Bentley Systems, Incorporated. All rights reserved.
 * Licensed under the MIT License. See LICENSE.md in the project root for license terms.
 *--------------------------------------------------------------------------------------------*/
-import { BentleyCloudRpcParams, MobileRpcConfiguration } from "@bentley/imodeljs-common";
+import { BentleyCloudRpcParams } from "@bentley/imodeljs-common";
 import { Config, UrlDiscoveryClient, OidcFrontendClientConfiguration, IOidcFrontendClient } from "@bentley/imodeljs-clients";
 import { IModelApp, OidcBrowserClient, FrontendRequestContext } from "@bentley/imodeljs-frontend";
 import { Presentation } from "@bentley/presentation-frontend";
@@ -11,7 +11,6 @@ import { UiComponents } from "@bentley/ui-components";
 import { UseBackend } from "../../common/configuration";
 import initLogging from "./logging";
 import initRpc from "./rpc";
-import { OidcIOSClient } from "./OidcIosClient";
 
 // initialize logging
 initLogging();
@@ -68,11 +67,7 @@ export class SimpleViewerApp {
     const scope = Config.App.getString("imjs_browser_test_scope");
     const oidcConfig: OidcFrontendClientConfiguration = { clientId, redirectUri, scope };
 
-    // create an OIDC client that helps with the sign-in / sign-out process
-    if (MobileRpcConfiguration.isMobileFrontend)
-      this._oidcClient = new OidcIOSClient(); // does not require config
-    else
-      this._oidcClient = new OidcBrowserClient(oidcConfig);
+    this._oidcClient = new OidcBrowserClient(oidcConfig);
 
     const requestContext = new FrontendRequestContext();
     await this._oidcClient.initialize(requestContext);

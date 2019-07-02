@@ -7,32 +7,33 @@ import * as Puppeteer from "puppeteer";
 import { expect } from "chai";
 import { page } from "../setupTests";
 import { signIn, findByText } from "../helpers";
+import { Config } from "@bentley/imodeljs-clients";
 
 async function openIModel() {
-    // Wait for "Open iModel" button to appear
-    await page.waitForSelector(".button-open-imodel");
+  // Wait for "Open iModel" button to appear
+  await page.waitForSelector(".button-open-imodel");
 
-    // Set up a promise for alert popup
-    const dialogPromise = new Promise((response) => page.on("dialog", response));
+  // Set up a promise for alert popup
+  const dialogPromise = new Promise((response) => page.on("dialog", response));
 
-    // Open iModel
-    await page.click(".button-open-imodel");
+  // Open iModel
+  await page.click(".button-open-imodel");
 
-    // If there's an alert with an error message, catch it earlier than 5 mins
-    await Promise.race([
-      dialogPromise.then((dialog) => { throw new Error((dialog as Puppeteer.Dialog).message()); }),
-      page.waitFor(5000),
-    ]);
+  // If there's an alert with an error message, catch it earlier than 5 mins
+  await Promise.race([
+    dialogPromise.then((dialog) => { throw new Error((dialog as Puppeteer.Dialog).message()); }),
+    page.waitFor(5000),
+  ]);
 
-    // Wait for at least one node to show up in the tree
-    await page.waitForSelector(`[data-testid="tree-node"]`, {timeout: 300000}); // 5 min. timeout, IModel may take a long time to load
+  // Wait for at least one node to show up in the tree
+  await page.waitForSelector(`[data-testid="tree-node"]`, {timeout: 300000}); // 5 min. timeout, IModel may take a long time to load
 }
 
 async function findNode(text: string) {
   const selector = `//div[contains(@data-testid, "tree-node") and contains(., "${text}")]`;
 
   // Wait for Node to render
-  await page.waitForXPath(selector, {visible: true});
+  await page.waitForXPath(selector, { visible: true });
 
   // Find Node
   const elementHandles = await page.$x(selector);
@@ -80,7 +81,7 @@ describe("Content view", () => {
     expect(async () => page.$(".components-property-grid .components-property-category-block")).to.throw;
 
     // Expand nodes
-    await findAndExpandNode("SVA TEST PROJECT");
+    await findAndExpandNode(Config.App.getString("imjs_test_project"));
     await findAndExpandNode("BisCore.DictionaryModel");
     await findAndExpandNode("Line Style");
 
@@ -105,7 +106,7 @@ describe("Content view", () => {
     await expanderHandle[0]!.click();
 
     // Limit search to properties
-    const propertiesHandle =  await page.$(".components-property-grid-wrapper");
+    const propertiesHandle = await page.$(".components-property-grid-wrapper");
     expect(propertiesHandle, "Property Pane wrapper not found!").to.exist;
     // Find "lc1" in properties
     await findByText(propertiesHandle!, "lc1");

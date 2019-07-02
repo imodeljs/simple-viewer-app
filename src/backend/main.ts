@@ -8,7 +8,7 @@ import { Logger } from "@bentley/bentleyjs-core";
 import { IModelHost } from "@bentley/imodeljs-backend";
 import { Presentation } from "@bentley/presentation-backend";
 import getSupportedRpcs from "../common/rpcs";
-import { RpcInterfaceDefinition, MobileRpcConfiguration } from "@bentley/imodeljs-common";
+import { RpcInterfaceDefinition } from "@bentley/imodeljs-common";
 import setupEnv from "../common/configuration";
 // setup environment
 setupEnv();
@@ -33,8 +33,6 @@ Presentation.initialize({
   let init: (rpcs: RpcInterfaceDefinition[]) => void;
   if (electron) {
     init = (await import("./electron/main")).default;
-  } else if (MobileRpcConfiguration.isMobileBackend) {
-    init = (await import("./mobile/main")).default;
   } else {
     init = (await import("./web/BackendServer")).default;
   }

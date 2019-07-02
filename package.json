@@ -6,23 +6,24 @@
     "name": "Bentley Systems, Inc.",
     "url": "http://www.bentley.com"
   },
+  "os": [
+    "win32",
+    "linux"
+  ],
   "version": "0.0.0",
   "private": true,
   "scripts": {
     "build": "buildIModelJsModule",
     "start:webserver": "node ./node_modules/@bentley/imodeljs-webserver/lib/WebServer.js --port=3000 --resources=./lib/webresources/",
     "start:backend": "node lib/backend/main.js",
-    "start:servers": "npm run start:makeconfig && env-cmd ./lib/webresources/config.json run-p \"start:webserver\" \"start:backend\"",
-    "start:makeconfig": "strip-json-comments --no-whitespace ./src/common/config.json > ./lib/webresources/config.json",
+    "start:servers": "env-cmd ./lib/webresources/config.json run-p \"start:webserver\" \"start:backend\"",
     "electron": "electron lib/backend/main.js",
     "clean": "rimraf lib",
-    "build:mobile-backend": "tsc 1>&2 && webpack --config ./node_modules/@bentley/webpack-tools/mobile/backend.config.js --env.outdir=./lib/mobile --env.entry=./lib/backend/main.js --env.bundlename=main ",
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:unit": "mocha --opts ./test/unit/mocha.opts \"test/unit/**/*.test.ts*\"",
     "test:integration": "mocha --opts ./test/integration/mocha.opts \"test/integration/**/*.test.ts*\"",
     "test:e2e": "start-server-and-test test:e2e:start-app http-get://localhost:3000 test:e2e:test-app",
-    "test:e2e:makeconfig": "strip-json-comments --no-whitespace ./test/end-to-end/config.json > ./lib/webresources/config.json",
-    "test:e2e:start-app": "npm run test:e2e:makeconfig && env-cmd ./lib/webresources/config.json run-p \"start:webserver\" \"start:backend\"",
+    "test:e2e:start-app": "env-cmd ./lib/webresources/config.json run-p \"start:webserver\" \"start:backend\"",
     "test:e2e:test-app": "mocha --opts ./test/end-to-end/mocha.opts \"test/end-to-end/**/*.test.ts*\"",
     "test:electron": "mocha --opts ./test/electron/mocha.opts \"test/electron/**/*.test.ts*\""
   },
@@ -53,31 +54,44 @@
         "bundleName": "main",
         "styleSheets": true,
         "htmlTemplate": "./src/frontend/index.html"
+      },
+      "makeConfig": {
+        "dest": "./lib/webresources/config.json",
+        "sources": [
+          {
+            "file": "process.env",
+            "filter": "^(i|I)(m|M)(j|J)(s|S)_"
+          },
+          {
+            "file": "./src/common/config.json",
+            "filter": "^(i|I)(m|M)(j|J)(s|S)_"
+          }
+        ]
       }
     }
   },
   "dependencies": {
-    "@bentley/bentleyjs-core": "1.0.0",
-    "@bentley/config-loader": "1.0.0",
-    "@bentley/electron-manager": "1.0.0",
-    "@bentley/express-server": "1.0.0",
-    "@bentley/geometry-core": "1.0.0",
-    "@bentley/icons-generic-webfont": "^0.0.9",
-    "@bentley/imodeljs-backend": "1.0.0",
-    "@bentley/imodeljs-clients": "1.0.0",
-    "@bentley/imodeljs-clients-backend": "1.0.0",
-    "@bentley/imodeljs-common": "1.0.0",
-    "@bentley/imodeljs-frontend": "1.0.0",
-    "@bentley/imodeljs-i18n": "1.0.0",
-    "@bentley/imodeljs-quantity": "1.0.0",
-    "@bentley/imodeljs-webserver": "1.0.0",
-    "@bentley/presentation-backend": "1.0.0",
-    "@bentley/presentation-common": "1.0.0",
-    "@bentley/presentation-components": "1.0.0",
-    "@bentley/presentation-frontend": "1.0.0",
-    "@bentley/presentation-testing": "1.0.0",
-    "@bentley/ui-components": "1.0.0",
-    "@bentley/ui-core": "1.0.0",
+    "@bentley/bentleyjs-core": "1.1.0",
+    "@bentley/config-loader": "1.1.0",
+    "@bentley/electron-manager": "1.1.0",
+    "@bentley/express-server": "1.1.0",
+    "@bentley/geometry-core": "1.1.0",
+    "@bentley/icons-generic-webfont": "^0.0.22",
+    "@bentley/imodeljs-backend": "1.1.0",
+    "@bentley/imodeljs-clients": "1.1.0",
+    "@bentley/imodeljs-clients-backend": "1.1.0",
+    "@bentley/imodeljs-common": "1.1.0",
+    "@bentley/imodeljs-frontend": "1.1.0",
+    "@bentley/imodeljs-i18n": "1.1.0",
+    "@bentley/imodeljs-quantity": "1.1.0",
+    "@bentley/imodeljs-webserver": "1.1.0",
+    "@bentley/presentation-backend": "1.1.0",
+    "@bentley/presentation-common": "1.1.0",
+    "@bentley/presentation-components": "1.1.0",
+    "@bentley/presentation-frontend": "1.1.0",
+    "@bentley/presentation-testing": "1.1.0",
+    "@bentley/ui-components": "1.1.0",
+    "@bentley/ui-core": "1.1.0",
     "body-parser": "^1.18",
     "bunyan": "^1.8.12",
     "chai-jest-snapshot": "^2.0.0",
@@ -92,8 +106,8 @@
     "redux": "^4.0.0"
   },
   "devDependencies": {
-    "@bentley/build-tools": "1.0.0",
-    "@bentley/webpack-tools": "1.0.0",
+    "@bentley/build-tools": "1.1.0",
+    "@bentley/webpack-tools": "1.1.0",
     "@types/body-parser": "^1.17",
     "@types/bunyan": "^1.8",
     "@types/chai": "^4.1.7",
@@ -123,7 +137,7 @@
     "strip-json-comments-cli": "^1.0.1",
     "ts-node": "^7.0.1",
     "typemoq": "^2.1.0",
-    "typescript": "^3.2.2",
+    "typescript": "^3.5.0",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.0",
     "xmlhttprequest": "^1.8.0"

@@ -4,36 +4,79 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "compounds": [
-      {
-        "name": "Web: All",
-        "configurations": [
-          "Web: Server (backend)",
-          "Web: Chrome (frontend)"
-        ]
-      },
-      {
-        "name": "Electron: All",
-        "configurations": [
-          "Electron: Main (backend)",
-          "Electron: Renderer (frontend)"
-        ]
+    {
+      "name": "Web: All",
+      "configurations": [
+        "Make config",
+        "Web: Server (webserver)",
+        "Web: Chrome (frontend)",
+      ]
+    },
+    {
+      "name": "Electron: All",
+      "configurations": [
+        "Electron: Main (backend)",
+        "Electron: Renderer (frontend)"
+      ]
     }
   ],
   "configurations": [
     {
       "type": "node",
       "request": "launch",
+      "name": "Web: Server (webserver)",
+      "protocol": "inspector",
+      "program": "${workspaceFolder}/node_modules/env-cmd/bin/env-cmd.js",
+      "cwd": "${workspaceFolder}",
+      "showAsyncStacks": true,
+      "smartStep": true,
+      "restart": true,
+      "args": [
+        "./lib/webresources/config.json",
+        "node",
+        "${workspaceFolder}/node_modules/npm-run-all/bin/run-p/index.js",
+         "start:webserver",
+         "start:backend"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Web: Server (backend)",
       "protocol": "inspector",
-      "program": "${workspaceFolder}/node_modules/@bentley/webpack-tools/bin/bentley-webpack-tools.js",
+      "program": "${workspaceFolder}/lib/backend/main.js",
+      "cwd": "${workspaceFolder}",
+      "showAsyncStacks": true,
+      "smartStep": true,
+      "restart": true
+    },
+    {
+      "name": "Make config",
+      "type": "node",
+      "request": "launch",
+      "protocol": "inspector",
+      "program": "${workspaceFolder}/node_modules/strip-json-comments-cli/cli.js",
       "cwd": "${workspaceFolder}",
       "args": [
-        "start",
-        "--debug=9229",
-        "--noElectron"
-      ],
-      "port": 9229,
-      "timeout": 100000,
+        "--no-whitespace",
+        "${workspaceFolder}/src/common/config.json",
+        ">",
+        "${workspaceFolder}/lib/webresources/config.json",
+        "${workspaceFolder}/test/unit/**/*.test.ts*"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Web: Server (backend) for tests",
+      "protocol": "inspector",
+      "program": "${workspaceFolder}/lib/backend/main.js",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "imjs_test_project": "Retail Building Sample QA",
+        "imjs_test_imodel": "Retail Building Sample QA",
+        "imjs_buddi_resolve_url_using_region": "102"
+      },
       "showAsyncStacks": true,
       "smartStep": true,
       "restart": true
@@ -54,35 +97,56 @@
       "request": "launch",
       "name": "Electron: Main (backend)",
       "protocol": "inspector",
-      "program": "${workspaceFolder}/node_modules/@bentley/webpack-tools/bin/bentley-webpack-tools.js",
       "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
+      "windows": {
+        "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron.cmd"
+      },
       "env": {
         "BROWSER": "none"
       },
       "args": [
-        "start",
-        "--electronDebug=5858",
-        "--electronRemoteDebug=9223",
-        "--noWeb"
+        "lib/backend/main.js"
       ],
-      "port": 5858,
-      "timeout": 100000,
-      "showAsyncStacks": true,
-      "smartStep": true,
-      "restart": true
     },
     {
-      "name": "Electron: Renderer (frontend)",
-      "type": "chrome",
-      "request": "attach",
-      "port": 9223,
-      "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/src",
-      "sourceMapPathOverrides": {
-        "webpack:///src/*": "${webRoot}/*"
-      },
-      "smartStep": true,
-      "timeout": 100000
+      "name": "E2E Tests only",
+      "type": "node",
+      "request": "launch",
+      "protocol": "inspector",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "cwd": "${workspaceFolder}/test/end-to-end",
+      "args": [
+        "--opts",
+        "${workspaceFolder}/test/end-to-end/mocha.opts",
+        "${workspaceFolder}/test/end-to-end/**/*.test.ts*"
+      ]
+    },
+    {
+      "name": "Unit Tests only",
+      "type": "node",
+      "request": "launch",
+      "protocol": "inspector",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--opts",
+        "${workspaceFolder}/test/unit/mocha.opts",
+        "${workspaceFolder}/test/unit/**/*.test.ts*"
+      ]
+    },
+    {
+      "name": "Electron test",
+      "type": "node",
+      "request": "launch",
+      "protocol": "inspector",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--opts",
+        "${workspaceFolder}/test/electron/mocha.opts",
+        "${workspaceFolder}/test/electron/**/*.test.ts*"
+      ]
     }
   ]
 }

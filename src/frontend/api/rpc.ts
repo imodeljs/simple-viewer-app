@@ -5,7 +5,7 @@
 import {
   BentleyCloudRpcManager, BentleyCloudRpcParams,
   ElectronRpcManager, ElectronRpcConfiguration,
-  RpcConfiguration, MobileRpcConfiguration, MobileRpcManager,
+  RpcConfiguration,
 } from "@bentley/imodeljs-common";
 import getSupportedRpcs from "../../common/rpcs";
 
@@ -18,8 +18,6 @@ export default function initRpc(rpcParams?: BentleyCloudRpcParams): RpcConfigura
   if (ElectronRpcConfiguration.isElectron) {
     // initializes RPC for Electron
     config = ElectronRpcManager.initializeClient({}, rpcInterfaces);
-  } else if (MobileRpcConfiguration.isMobileFrontend) {
-    config = MobileRpcManager.initializeClient(rpcInterfaces);
   } else {
     // initialize RPC for web apps
     if (!rpcParams)

@@ -36,7 +36,7 @@ export default function setupEnv() {
     // Set this to the registered clientId
     // Note: "imodeljs-spa-test-2686" is setup to work with the (default) localhost redirect URI below
 
-    imjs_browser_test_redirect_uri : "http://localhost:3000/signin-callback",
+    imjs_browser_test_redirect_uri: "http://localhost:3000/signin-callback",
     // Set this to be the registered redirect URI
     // Note: "http://localhost:3000/signin-callback" is setup to work with the (default) clientId above
 

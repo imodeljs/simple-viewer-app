@@ -36,4 +36,14 @@ export async function fillInSignin(page: Puppeteer.Page) {
   await page.type("#Password", Config.App.getString("imjs_test_regular_user_password"));
 
   await page.click("#submitLogon");
+
+  // Try to catch failed logins
+  try {
+    await page.waitForSelector("#messageControlDiv", { visible: true, timeout: 1000 }).then(() => { throw new Error(`Failed login to ${page.url()} for ${Config.App.getString("imjs_test_regular_user_name")} using ${Config.App.getString("IMJS_BUDDI_RESOLVE_URL_USING_REGION")}`); });
+  } catch (e) {
+    // Ignore Timeout errors
+    if (!e.name.includes("Timeout")) {
+      throw e;
+    }
+  }
 }
