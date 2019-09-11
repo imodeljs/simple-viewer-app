@@ -15,8 +15,7 @@
     {
       "name": "Electron: All",
       "configurations": [
-        "Electron: Main (backend)",
-        "Electron: Renderer (frontend)"
+        "Electron: Main (backend)"
       ]
     }
   ],

@@ -13,36 +13,39 @@ This app serves as a guide on how you can embed one or more of these components 
 See http://imodeljs.org for comprehensive documentation on the iModel.js API and the various constructs used in this sample.
 
 ## Development Setup
+1. Get the [required tools](https://imodeljs.github.io/iModelJs-docs-output/getting-started/#1-get-the-tools) and ensure you have _Node.js 10.x LTS_ installed on your machine.
 
-1. (Optional) Create a sample project using the procedure at [Developer Registration](https://imodeljs.github.io/iModelJs-docs-output/getting-started/#developer-registration).  This step is not needed if you already have a project to test with.
+2. (Optional) Create a sample project using the procedure at [Developer Registration](https://imodeljs.github.io/iModelJs-docs-output/getting-started/#developer-registration).  This step is not needed if you already have a project to test with.
 
-2. (Recommended) Register your application at [Developer Registration](https://imodeljs.github.io/iModelJs-docs-output/getting-started/#developer-registration).
+3. (Recommended) Register your application at [Developer Registration](https://imodeljs.github.io/iModelJs-docs-output/getting-started/#developer-registration).
 
     For the purpose of running this sample on localhost, ensure your registration includes http://localhost:3000/signin-callback as a valid redirect URI.
 
+    If you would like to run this sample in electron, another application should be registered which includes [electron://frontend/signin-callback]() as a valid redirect URI.
+
     Note: If you are just testing on localhost you can use the default registration included in this sample. However, it's recommended that you complete the registration, especially since registration is a requirement before the application can be deployed. For more information, see the section on [authorization](https://imodeljs.github.io/iModelJs-docs-output/learning/common/accesstoken/).
 
-3. Edit [src/common/configuration.ts](./src/common/configuration.ts) and [src/common/config.json](./src/common/config.json) to set the values you obtain from the registration process.
+4. Edit [src/common/configuration.ts](./src/common/configuration.ts) and [src/common/config.json](./src/common/config.json) to set the values you obtain from the registration process.
 
-4. Install the dependencies
+5. Install the dependencies
 
   ```sh
   npm install
   ```
 
-5. Build the application
+6. Build the application
 
   ```sh
   npm run build
   ```
 
-6. There are two servers, a web server that delivers the static web resources (the frontend Javascript, localizable strings, fonts, cursors, etc.), and the backend RPC server that opens the iModel on behalf of the application. Start them both running locally:
+7. There are two servers, a web server that delivers the static web resources (the frontend Javascript, localizable strings, fonts, cursors, etc.), and the backend RPC server that opens the iModel on behalf of the application. Start them both running locally:
 
   ```sh
   npm run start:servers
   ```
 
-7. Open a web browser (e.g., Chrome or Edge), and browse to localhost:3000.
+8. Open a web browser (e.g., Chrome or Edge), and browse to localhost:3000.
 
 [//]: # (Commented out until Electron version fixed. Note: The Electron version is meant to run on desktops, but will currently not work within a virtual machine.)
 
