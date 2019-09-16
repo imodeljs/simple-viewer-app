@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import { RpcInterfaceDefinition, IModelReadRpcInterface, IModelTileRpcInterface, SnapshotIModelRpcInterface } from "@bentley/imodeljs-common";
 import { PresentationRpcInterface } from "@bentley/presentation-common";
+import { FileReaderRpcInterface } from "./FileReaderRpcInterface";
 
 /**
  * Returns a list of RPCs supported by this application
@@ -12,6 +13,7 @@ export default function getSupportedRpcs(): RpcInterfaceDefinition[] {
   return [
     IModelReadRpcInterface,
     IModelTileRpcInterface,
+    FileReaderRpcInterface,
     PresentationRpcInterface,
     SnapshotIModelRpcInterface,
   ];

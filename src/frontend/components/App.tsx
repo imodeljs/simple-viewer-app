@@ -16,6 +16,8 @@ import TreeWidget from "./Tree";
 import ViewportContentControl from "./Viewport";
 import "@bentley/icons-generic-webfont/dist/bentley-icons-generic-webfont.css";
 import "./App.css";
+import { FileReaderRpcInterface } from "../../common/FileReaderRpcInterface";
+import { GasketDecorator } from "./GasketDecorator";
 
 // tslint:disable: no-console
 // cSpell:ignore imodels
@@ -136,6 +138,12 @@ export default class App extends React.Component<{}, AppState> {
       return;
     }
     try {
+
+      const info: any[] = await FileReaderRpcInterface.getClient().fetchInfo(imodel.iModelToken);
+
+      const decorator = new GasketDecorator(info);
+      IModelApp.viewManager.addDecorator(decorator);
+
       // attempt to get a view definition
       const viewDefinitionId = imodel ? await this.getFirstViewDefinitionId(imodel) : undefined;
       this.setState({ imodel, viewDefinitionId });

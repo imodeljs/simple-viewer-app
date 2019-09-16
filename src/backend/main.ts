@@ -10,6 +10,8 @@ import { Presentation } from "@bentley/presentation-backend";
 import getSupportedRpcs from "../common/rpcs";
 import { RpcInterfaceDefinition } from "@bentley/imodeljs-common";
 import setupEnv from "../common/configuration";
+import { FileReaderRpcImpl } from "./FileReaderRpcImpl";
+
 // setup environment
 setupEnv();
 
@@ -18,6 +20,7 @@ Logger.initializeToConsole();
 
 // initialize imodeljs-backend
 IModelHost.startup();
+FileReaderRpcImpl.register();
 
 // initialize presentation-backend
 Presentation.initialize({
