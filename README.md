@@ -1,5 +1,7 @@
 # Simple Viewer App
 
+> NOTE: This repository has been archived and all future updates will be made in the [iModel.js Samples](https://github.com/imodeljs/imodeljs-samples) repository.
+
 Copyright © 2019 Bentley Systems, Incorporated. All rights reserved.
 
 An iModel.js sample application that demonstrates opening an iModel and viewing its data. The data is presented using the following components:
@@ -13,6 +15,7 @@ This app serves as a guide on how you can embed one or more of these components 
 See http://imodeljs.org for comprehensive documentation on the iModel.js API and the various constructs used in this sample.
 
 ## Development Setup
+
 1. Get the [required tools](https://imodeljs.github.io/iModelJs-docs-output/getting-started/#1-get-the-tools) and ensure you have _Node.js 10.x LTS_ installed on your machine.
 
 2. (Optional) Create a sample project using the procedure at [Developer Registration](https://imodeljs.github.io/iModelJs-docs-output/getting-started/#developer-registration).  This step is not needed if you already have a project to test with.
